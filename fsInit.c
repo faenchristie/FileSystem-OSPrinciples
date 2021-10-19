@@ -11,6 +11,7 @@
 * Description: Main driver for file system assignment.
 *
 * This file is where you will start and initialize your system
+* initialize the volume control block
 *
 **************************************************************/
 
@@ -24,6 +25,19 @@
 #include "fsLow.h"
 #include "mfs.h"
 
+/******************************************************************************
+ * specifies information about how many blocks are there, what are the size of
+ * each blocks, how many free blocks are there, etc.
+ * uint64_t is an unsigned integer of 64 bits
+ *****************************************************************************/
+typedef struct {
+	uint64_t volumeSize;
+	uint64_t blockSize;
+	uint64_t numberOfBlocks;
+	char * fileName;
+	int startingBlock;
+	int numberOfFreeBlocks;
+} vcbStruct, *vcbStruct_p;
 
 int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	{
