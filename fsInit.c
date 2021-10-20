@@ -24,25 +24,32 @@
 
 #include "fsLow.h"
 #include "mfs.h"
+#include "fsVCB.h"
 
 /******************************************************************************
- * specifies information about how many blocks are there, what are the size of
- * each blocks, how many free blocks are there, etc.
- * uint64_t is an unsigned integer of 64 bits
+ * VARIABLES HERE
  *****************************************************************************/
-typedef struct {
-	uint64_t volumeSize;
-	uint64_t blockSize;
-	uint64_t numberOfBlocks;
-	char * fileName;
-	int startingBlock;
-	int numberOfFreeBlocks;
-} vcbStruct, *vcbStruct_p;
+int initialized = 0; // check if vcb is initialized
+uint64_t volumeSize;
+uint64_t blockSize;
+uint64_t numberOfBlocks;
+uint64_t startingBlock;
+uint64_t numberOfFreeBlocks;
+uint64_t freeListSize;
+vcbStruct * vcb_p;
 
 int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	{
 	printf ("Initializing File System with %ld blocks with a block size of %ld\n", numberOfBlocks, blockSize);
 	/* TODO: Add any code you need to initialize your file system. */
+
+	printf ("-----Initializing the Volume Control Block-----\n");
+	vcb_p->volumeSize = volumeSize;
+	vcb_p->blockSize = blockSize;
+	vcb_p->numberOfBlocks = numberOfBlocks;
+	vcb_p->startingBlock = startingBlock;
+	vcb_p->numberOfFreeBlocks = numberOfFreeBlocks;
+	vcb_p->freeListSize = freeListSize;
 
 	return 0;
 	}
