@@ -142,28 +142,20 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 			entry_p[i].size = 0;
 		}
 
-		printf("After init entries");
-
 		strcpy(entry_p[0].name, "Root");
 		entry_p[0].blockLocation = BLOCKS + 1;
 		entry_p[0].size = 60;
 		// entry_p[0].type =
-
-		printf("After root");
 
 		strcpy(entry_p[1].name, ".");
 		entry_p[1].size = entry_p[0].size + 60;
 		// entry_p[1].blockLocation =
 		// entry_p[1].type =
 
-		printf("After entry 1");
-
 		strcpy(entry_p[2].name, "..");
 		entry_p[2].size = entry_p[1].size;
 		// entry_p[2].blockLocation =
 		// entry_p[2].type =
-
-		printf("After entry 2");
 	}
 	return 0;
 }
