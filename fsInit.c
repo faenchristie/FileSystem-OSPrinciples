@@ -132,7 +132,7 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 		* Finally, return the starting block number of the root directory
 		**********************************************************************/
 		printf("-----Initializing the root directory-----\n");
-		entry_p = malloc(DIRENTRIES * 60);
+		entry_p = malloc(3000);
 
 		for (int i = 0; i < DIRENTRIES + 1; i++)
 		{
