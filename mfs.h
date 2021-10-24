@@ -33,20 +33,11 @@ typedef u_int32_t uint32_t;
 #endif
 
 #define VCB_STARTING_BLOCK 0
-/******************************************************************************
- * specifies information about how many blocks are there, what are the size of
- * each blocks, how many free blocks are there, etc.
- * uint64_t is an unsigned integer of 64 bits
- *****************************************************************************/
-typedef struct
-{
-	uint64_t volumeSize;
-	uint64_t blockSize;
-	uint64_t numberOfBlocks;
-	uint64_t startingBlock;
-	uint64_t numberOfFreeBlocks;
-	uint64_t freeListSize;
-} vcbStruct, *vcbStruct_p;
+
+#define MAGICNUMBER 666
+#define BLOCKSIZE 512
+#define DEFAULTSIZE 2442
+#define BLOCKS DEFAULTSIZE / BLOCKSIZE
 
 // This structure is returned by fs_readdir to provide the caller with information
 // about each file as it iterates through a directory
