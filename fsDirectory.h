@@ -12,3 +12,5 @@
 * directory for now, will use in conjunction with mfs.h later
 * on
 **************************************************************/
+
+int initRootDir();

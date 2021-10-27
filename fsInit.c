@@ -24,6 +24,10 @@
 #include "fsLow.h"
 #include "mfs.h"
 #include "fsEntry.h"
+#include "fsDirectory.h"
+#include "fsFree.h"
+
+#define MAGICNUMBER = 9823498237
 
 /******************************************************************************
  * specifies information about how many blocks are there, what are the size of
@@ -32,37 +36,22 @@
  *****************************************************************************/
 typedef struct
 {
-	int magicNum;
-	uint64_t volumeSize;
-	uint64_t blockSize;
-	uint64_t numberOfBlocks;
-	uint64_t startingBlock;
-	uint64_t numberOfFreeBlocks;
-	int freeMapStart;
+	int blockSize
+	int blockCount
+	int rootDir
+	int freeSpaceMap
+	unsigned char * signature
 } vcbStruct, *vcbStruct_p;
 
 /******************************************************************************
  * GLOBAL VARIABLES HERE
  *****************************************************************************/
-int initialized = 0; // check if vcb is initialized
-uint64_t volumeSize;
-uint64_t blockSize;
-uint64_t numberOfBlocks;
-uint64_t startingBlock;
-uint64_t numberOfFreeBlocks;
-int freeMapStart;
-char *freeSpaceMap;
-
 int blockLocation;
 char name[50];
 char type;
 int size;
 
-vcbStruct *vcb_p;
-entryStruct *entry_p;
-
-int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
-{
+int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize) {
 	/**************************************************************************
 	* --------------------Initializing the file system-------------------------
 	* First, store a mallaoc of blocksize into the vcb pointer variable,
@@ -71,20 +60,20 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	* pointer. If they magic numbers do not match, the initialization will
 	* occur for the VCB, freespace, and the root directory.
 	**************************************************************************/
+	printf("Initializing File System with %ld blocks with a block size of %ld\n", numberOfBlocks, blockSize);
+		/* TODO: Add any code you need to initialize your file system. */
+
+	vcbStruct * vcb_p;
 	vcb_p = malloc(blockSize);
 
-	uint64_t read = LBAread(vcb_p, 1, 0);
+	LBAread(vcb_p, 1, 0);
 
-	if (vcb_p->magicNum == MAGICNUMBER)
-	{
-		//// vcb already initialized if magic number matches
-		printf("VCB initialized...");
+	if (vcb_p->signature != MAGICNUMBER) {
+		printf("Signature did NOT match\n");
+		vcb_p->blockSize;
+		vcb_p->blockCount;
+		vcb_p->rootDir = initRoot
 	}
-
-	else
-	{
-		printf("Initializing File System with %ld blocks with a block size of %ld\n", numberOfBlocks, blockSize);
-		/* TODO: Add any code you need to initialize your file system. */
 
 		printf("-----Initializing the Volume Control Block-----\n");
 		vcb_p->volumeSize = volumeSize;

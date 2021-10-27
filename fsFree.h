@@ -6,8 +6,9 @@
 * Group Name:
 * Project: Basic File System
 *
-* File: fsInit.c
+* File: fsFree.h
 *
-* Description: functions for free space management
-*
+* Description: function definitions for free space management
 **************************************************************/
+
+int initFreeSpace(uint64_t numberOfBlocks, uint64_t blockSize);
