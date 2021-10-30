@@ -34,7 +34,6 @@ typedef u_int32_t uint32_t;
 
 #define VCB_STARTING_BLOCK 0
 
-#define MAGICNUMBER 666
 #define BLOCKSIZE 512
 #define DEFAULTSIZE 2442
 #define BLOCKS DEFAULTSIZE / BLOCKSIZE
