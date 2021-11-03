@@ -23,6 +23,7 @@
 #include "fsEntry.h"
 #include "fsDirectory.h"
 #include "fsFree.h"
+#include "fsFree.c"
 
 entryStruct * entry_p;
 
@@ -54,21 +55,21 @@ int initRootDir() {
 	strcpy(entry_p[0].name, "Root");
 	entry_p[0].blockLocation = BLOCKS + 1;
 	entry_p[0].size = 60;
-	// entry_p[0].type =
+	entry_p[0].type = 'D';
 
 	printf("After root");
 
 	strcpy(entry_p[1].name, ".");
 	entry_p[1].size = entry_p[0].size + 60;
-	// entry_p[1].blockLocation =
-	// entry_p[1].type =
+	// entry_p[1].blockLocation = 
+	entry_p[1].type = 'D';
 
 	printf("After entry 1");
 
 	strcpy(entry_p[2].name, "..");
 	entry_p[2].size = entry_p[1].size;
 	// entry_p[2].blockLocation =
-	// entry_p[2].type =
+	entry_p[2].type = 'D';
 
     printf("After entry 2");
 }

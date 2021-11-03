@@ -21,6 +21,6 @@ typedef struct
 {
     int blockLocation;
     char name[50];
-    char type;
+    char type; // D = directory, F = file
     int size;
 } entryStruct, *entryStruct_p;
