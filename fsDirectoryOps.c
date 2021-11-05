@@ -28,7 +28,16 @@ or directories.
  * -----opens a directory-----
  * 
  *****************************************************************************/
-fdDir *fs_opendir(const char *name) {
+fdDir *fs_opendir(const char *name)
+{
+    // call b_open
+
+    // set all corresponding values of b_open to fdDir
+
+    // (length, direntry position, starting LBA of directory, name? )
+
+    // return fdDir
+
     return 0;
 }
 
@@ -36,7 +45,21 @@ fdDir *fs_opendir(const char *name) {
  * -----read a directory-----
  * 
  *****************************************************************************/
-struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
+struct fs_diriteminfo *fs_readdir(fdDir *dirp)
+{
+
+    // this function returns the next directory entry of the current directory entry.
+
+    // declare fs_firiteminfo, possibly as global variable?
+
+    // need some sort of way to check which child we are on. possibly the index
+    // of the entries? Might need to be global variable.
+
+    // loop through entries, find entry that is the child of this directory.
+
+    // first one found, set the fs_direiteminfo struct properties
+    // (length, fileType, name)
+
     return 0;
 }
 
@@ -44,7 +67,9 @@ struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
  * -----close a directory-----
  * 
  *****************************************************************************/
-int fs_closedir(fdDir *dirp) {
+int fs_closedir(fdDir *dirp)
+{
+    // b_close ?
     return 0;
 }
 
@@ -52,7 +77,18 @@ int fs_closedir(fdDir *dirp) {
  * -----check if it is a file or not-----
  * return 1 if file, 0 otherwise
  *****************************************************************************/
-int fs_isFile(char *path) {
+int fs_isFile(char *path)
+{
+    // parse path
+
+    // look for path in entries
+
+    // if path doesn't exist, give error, return 0
+
+    // if entry of path is found, check value to see if file
+
+    // if it is file, return 1
+
     return 0;
 }
 
@@ -61,7 +97,19 @@ int fs_isFile(char *path) {
  * return 1 if directory, 0 otherwise
  * 
  *****************************************************************************/
-int fs_isDir(char *path) {
+int fs_isDir(char *path)
+{
+
+    // parse path
+
+    // look for path in entries
+
+    // if path doesn't exist, give error, return 0
+
+    // if path exists, check if its value is a directory
+
+    // if it is a directory, return 1
+
     return 0;
 }
 
@@ -69,6 +117,10 @@ int fs_isDir(char *path) {
  * 
  * 
  *****************************************************************************/
-int fs_stat(const char *path, struct fs_stat *buf) {
+int fs_stat(const char *path, struct fs_stat *buf)
+{
+    // check entries for path , declare that variable
+
+    // use this to set all values of fs_stat struct
     return 0;
 }
