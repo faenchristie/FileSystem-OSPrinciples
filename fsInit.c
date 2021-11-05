@@ -27,7 +27,7 @@
 #include "fsDirectory.h"
 #include "fsFree.h"
 
-#define MAGICNUMBER = 9823498237
+#define MAGICNUMBER 3141592654
 
 /******************************************************************************
  * specifies information about how many blocks are there, what are the size of
@@ -40,7 +40,7 @@ typedef struct
 	int blockCount;
 	int rootDir;
 	int freeSpaceMap;
-	unsigned char *signature;
+	unsigned int signature;
 } vcbStruct, *vcbStruct_p;
 
 /******************************************************************************
@@ -61,21 +61,22 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	* pointer. If they magic numbers do not match, the initialization will
 	* occur for the VCB, freespace, and the root directory.
 	**************************************************************************/
-	printf("Initializing File System with %ld blocks with a block size of %ld\n", numberOfBlocks, blockSize);
+	printf("Initializing File System with %lld blocks with a block size of %lld\n", numberOfBlocks, blockSize);
 	/* TODO: Add any code you need to initialize your file system. */
 
 	vcbStruct *vcb_p;
+	
+	printf("About to allocate %ld bytes for VCB\n", sizeof(vcbStruct));
 	vcb_p = malloc(blockSize);
 
 	LBAread(vcb_p, 1, 0);
 
-	if (vcb_p->signature != MAGICNUMBER)
-	{
+	if (vcb_p->signature != MAGICNUMBER) {
 		printf("Signature did NOT match\n");
 		vcb_p->blockSize;
 		vcb_p->blockCount;
-		vcb_p->rootDir = initRoot();
-		vcb_p->freeSpaceMap = initFreeSpaceMap(numberOfBlocks, blockSize);
+		vcb_p->rootDir = initRootDir();
+		vcb_p->freeSpaceMap = initFreeSpace(numberOfBlocks, blockSize);
 		vcb_p->signature = MAGICNUMBER;
 		LBAwrite(vcb_p, 1, 0);
 	}
@@ -83,7 +84,7 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	{
 		printf("Signature Matched\n");
 		int fsBlockCount = (((numberOfBlocks + 7) / 8) + (blockSize - 1)) / blockSize;
-		printf("fsBlockCount is $d\n", fsBlockCount);
+		printf("fsBlockCount is %d\n", fsBlockCount);
 		unsigned char *fsMap = malloc(fsBlockCount * blockSize);
 		LBAread(fsMap, fsBlockCount, vcb_p->freeSpaceMap);
 	}
