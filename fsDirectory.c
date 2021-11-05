@@ -25,7 +25,10 @@
 #include "fsFree.h"
 #include "fsFree.c"
 
-entryStruct * entry_p;
+entryStruct *entry_p;
+
+// some sort of way to keep track of our entries?
+entryStruct *entries;
 
 /**********************************************************************
 * -----------------Initializing the root directory---------------------
@@ -38,8 +41,9 @@ entryStruct * entry_p;
 * as the first entry "." except that the name will be ".."
 * Finally, return the starting block number of the root directory
 **********************************************************************/
-int initRootDir() {
-    printf("-----Initializing the root directory-----\n");
+int initRootDir()
+{
+	printf("-----Initializing the root directory-----\n");
 	entry_p = malloc(3000);
 
 	for (int i = 0; i < DIRENTRIES + 1; i++)
@@ -61,7 +65,7 @@ int initRootDir() {
 
 	strcpy(entry_p[1].name, ".");
 	entry_p[1].size = entry_p[0].size + 60;
-	// entry_p[1].blockLocation = 
+	// entry_p[1].blockLocation =
 	entry_p[1].type = 'D';
 
 	printf("After entry 1");
@@ -71,5 +75,5 @@ int initRootDir() {
 	// entry_p[2].blockLocation =
 	entry_p[2].type = 'D';
 
-    printf("After entry 2");
+	printf("After entry 2");
 }
