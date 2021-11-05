@@ -9,7 +9,7 @@
 * File: fsDirectoryOps.c
 *
 * Description: File contains functions for directory operations 
-* including read, close, open, isfile, isDir, stat.
+* including read, close, open, isfile, isDir, stat
 **************************************************************/
 
 #include <stdlib.h>
@@ -64,7 +64,7 @@ fdDir *fs_opendir(const char *name)
 
 
 
- /******************************************************************************
+/******************************************************************************
  *                      -----read a directory-----
  * 
  *****************************************************************************/
