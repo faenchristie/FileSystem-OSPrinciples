@@ -1,9 +1,9 @@
 /**************************************************************
-* Class:  CSC-415-0# Fall 2021
-* Names: 
-* Student IDs:
-* GitHub Name:
-* Group Name:
+* Class:  CSC-415-03 + CSC-415-02 Fall 2021
+* Names: Natalie Christie , Joseph Kois , Jade Simien , Eugene San Juan
+* Student IDs: 918376646 , 920921089 , 920258687 , 918354065
+* GitHub Name: nataliekchristie , josephkois , JadeS01 , esanjuan915
+* Group Name: Arrays of Dread
 * Project: Basic File System
 *
 * File: fsInit.c
@@ -34,12 +34,13 @@
  * each blocks, how many free blocks are there, etc.
  * uint64_t is an unsigned integer of 64 bits
  *****************************************************************************/
-typedef struct {
+typedef struct
+{
 	int blockSize;
 	int blockCount;
 	int rootDir;
 	int freeSpaceMap;
-	unsigned char * signature;
+	unsigned char *signature;
 } vcbStruct, *vcbStruct_p;
 
 /******************************************************************************
@@ -50,7 +51,8 @@ char name[50];
 char type;
 int size;
 
-int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize) {
+int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
+{
 	/**************************************************************************
 	* --------------------Initializing the file system-------------------------
 	* First, store a mallaoc of blocksize into the vcb pointer variable,
@@ -60,14 +62,15 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize) {
 	* occur for the VCB, freespace, and the root directory.
 	**************************************************************************/
 	printf("Initializing File System with %ld blocks with a block size of %ld\n", numberOfBlocks, blockSize);
-		/* TODO: Add any code you need to initialize your file system. */
+	/* TODO: Add any code you need to initialize your file system. */
 
-	vcbStruct * vcb_p;
+	vcbStruct *vcb_p;
 	vcb_p = malloc(blockSize);
 
 	LBAread(vcb_p, 1, 0);
 
-	if (vcb_p->signature != MAGICNUMBER) {
+	if (vcb_p->signature != MAGICNUMBER)
+	{
 		printf("Signature did NOT match\n");
 		vcb_p->blockSize;
 		vcb_p->blockCount;
@@ -75,11 +78,13 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize) {
 		vcb_p->freeSpaceMap = initFreeSpaceMap(numberOfBlocks, blockSize);
 		vcb_p->signature = MAGICNUMBER;
 		LBAwrite(vcb_p, 1, 0);
-	} else {
+	}
+	else
+	{
 		printf("Signature Matched\n");
-		int fsBlockCount = (((numberOfBlocks + 7) / 8 ) + (blockSize - 1)) / blockSize;
+		int fsBlockCount = (((numberOfBlocks + 7) / 8) + (blockSize - 1)) / blockSize;
 		printf("fsBlockCount is $d\n", fsBlockCount);
-		unsigned char * fsMap = malloc (fsBlockCount * blockSize);
+		unsigned char *fsMap = malloc(fsBlockCount * blockSize);
 		LBAread(fsMap, fsBlockCount, vcb_p->freeSpaceMap);
 	}
 	return 0;
