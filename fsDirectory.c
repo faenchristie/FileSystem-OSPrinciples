@@ -6,11 +6,10 @@
 * Group Name: Arrays of Dread
 * Project: Basic File System
 *
-* File: fsInit.c
+* File: fsDirectory.c
 *
-* Description: holds the directory functions like create 
-* directory for now, will use in conjunction with mfs.h later
-* on
+* Description: logic for the initRoot() function and also
+* creation of the listOfEntries array
 **************************************************************/
 #include <stdlib.h>
 #include <unistd.h>
@@ -22,13 +21,13 @@
 #include "mfs.h"
 #include "fsEntry.h"
 #include "fsDirectory.h"
-#include "fsFree.h"
-#include "fsFree.c"
 
 entryStruct *entry_p;
 
 // some sort of way to keep track of our entries?
-entryStruct *entries;
+//array of directory entries witht he size 5 * 512 which is 2,560 bytes
+entryStruct *listOfEntries[5 * BLOCKSIZE];
+
 
 /**********************************************************************
 * -----------------Initializing the root directory---------------------
@@ -76,4 +75,7 @@ int initRootDir()
 	entry_p[2].type = 'D';
 
 	printf("After entry 2");
+
+	//writing root directory
+	LBAwrite(entry_p, 6, 1);
 }

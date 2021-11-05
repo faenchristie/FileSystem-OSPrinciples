@@ -8,7 +8,8 @@
 *
 * File: fsFree.h
 *
-* Description: function definitions for free space management
+* Description: function definitions for initializing the free
+* space for the file system.
 **************************************************************/
 
 int initFreeSpace(uint64_t numberOfBlocks, uint64_t blockSize);

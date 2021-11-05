@@ -8,8 +8,8 @@
 *
 * File: fsDirectoryOps.c
 *
-* Description: Represents entries whether they be files
-or directories.
+* Description: File contains functions for directory operations 
+* including read, close, open, isfile, isDir, stat.
 **************************************************************/
 
 #include <stdlib.h>
@@ -22,27 +22,50 @@ or directories.
 #include "mfs.h"
 #include "fsEntry.h"
 #include "fsDirectory.h"
-#include "fsFree.h"
+#include "b_io.h"
+
 
 /******************************************************************************
- * -----opens a directory-----
+ *                        -----parses file path-----
+ * parsing the file path with the token "/" to denote when the path begins/ends
+ *****************************************************************************/
+ char * parsePath(char *path) {
+    // nullify path 
+    char * filePathArr; 
+    char *savePtr;
+    char *token = strtok_r(path, '/', &savePtr);
+    while(token != NULL){
+        strcpy(filePathArr,token);
+        token = strtok_r(NULL, "/", &savePtr)
+    }
+    return filePathArr;
+}
+
+/******************************************************************************
+ *                   -----opens a directory-----
  * 
  *****************************************************************************/
 fdDir *fs_opendir(const char *name)
 {
+    int fd;
     // call b_open
-
+    fd = b_open(name,O_RDWR);
     // set all corresponding values of b_open to fdDir
 
-    // (length, direntry position, starting LBA of directory, name? )
+    fdDir dir; 
 
-    // return fdDir
+    for(int i = 0; i < entriesLength; i++) {
+        if(strcmp(entries[i].path,name)) {
+            dir->name = name;
+            // find rec length
+            // find entry position in directory
+            // find         }
+    }    // (length,LBA of directory direntry position, starting LBA of directory, name? )
 
-    return 0;
-}
 
-/******************************************************************************
- * -----read a directory-----
+
+ /******************************************************************************
+ *                      -----read a directory-----
  * 
  *****************************************************************************/
 struct fs_diriteminfo *fs_readdir(fdDir *dirp)
@@ -64,7 +87,7 @@ struct fs_diriteminfo *fs_readdir(fdDir *dirp)
 }
 
 /******************************************************************************
- * -----close a directory-----
+ *                      -----close a directory-----
  * 
  *****************************************************************************/
 int fs_closedir(fdDir *dirp)
@@ -74,43 +97,60 @@ int fs_closedir(fdDir *dirp)
 }
 
 /******************************************************************************
- * -----check if it is a file or not-----
- * return 1 if file, 0 otherwise
+ *  b_close();   -----check if it is a file or not-----
+ * First, we created a variable for the length of our array in order to
+ * traverse using a for loop. Next, inside the For loop there will need to be
+ * a string comparison for the path. Outside the for loop, we have to make sure
+ * the types line up from the entries, to do this we compare with a char D
+ * which refers to the fact that it is a file. Returning 1 if it is, or 0
+ * if it is not a file.
  *****************************************************************************/
-int fs_isFile(char *path)
-{
-    // parse path
-
+int fs_isFile(char *path) {
+    int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
+    entryStruct * entry_p ;
     // look for path in entries
+    for(int i = 0; i < entriesLength; i++) {
+        if(strcmp(entries[i].path,path)){
+            entry_p = entries[i];
+        }
+    }
+    
+    if(strcmp(entry_p->type, "F"){
+        return 1;
+    }
 
-    // if path doesn't exist, give error, return 0
-
-    // if entry of path is found, check value to see if file
-
-    // if it is file, return 1
-
-    return 0;
+    else{
+        return 0;
+    }
 }
 
 /******************************************************************************
- * -----check if it is a directory or not-----
- * return 1 if directory, 0 otherwise
- * 
+ *                 -----check if it is a directory or not-----                  
+ * First, we created a variable for the length of our array in order to
+ * traverse using a for loop. Next, inside the For loop there will need to be
+ * a string comparison for the path. Outside the for loop, we have to make sure
+ * the types line up from the entries, to do this we compare with a char D
+ * which refers to the fact that it is a directory. Returning 1 if it is, or 0
+ * if it is not a directory.
  *****************************************************************************/
 int fs_isDir(char *path)
 {
-
-    // parse path
-
+    int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
+    entryStruct * entry_p ;
     // look for path in entries
+    for(int i = 0; i < entriesLength; i++) {
+        if(strcmp(entries[i].path,path)){
+            entry_p = entries[i];
+        }
+    }
+    
+    if(strcmp(entry_p->type, "D"){
+        return 1;
+    }
 
-    // if path doesn't exist, give error, return 0
-
-    // if path exists, check if its value is a directory
-
-    // if it is a directory, return 1
-
-    return 0;
+    else{
+        return 0;
+    }
 }
 
 /******************************************************************************

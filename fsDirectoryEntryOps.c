@@ -8,8 +8,9 @@
 *
 * File: fsDirectoryEntryOps.h
 *
-* Description: Represents entries whether they be files
-or directories.
+* Description: File containing functions for directory entry
+* operations including delete, make directory, remove, and cwd
+* functions. 
 **************************************************************/
 
 #include <stdlib.h>
