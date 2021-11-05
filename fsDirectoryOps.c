@@ -27,7 +27,8 @@
 
 /******************************************************************************
  *                        -----parses file path-----
- * parsing the file path with the token "/" to denote when the path begins/ends
+ * parsing the file path with the token "/" to denote when the path begins and
+ * ends.
  *****************************************************************************/
  char * parsePath(char *path) {
     // nullify path 
