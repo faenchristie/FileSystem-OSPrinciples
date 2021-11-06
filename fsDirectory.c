@@ -49,10 +49,10 @@ int initRootDir()
 	{
 		entry_p[i].blockLocation = 0;
 		strcpy(entry_p[i].name, "Entry");
-		entry_p[i].type = 'undefined';
+		entry_p[i].type = 'u'; // U = undefined
 		entry_p[i].size = 0;
 	}
-
+   
 	printf("After init entries");
 
 	strcpy(entry_p[0].name, "Root");
@@ -60,21 +60,17 @@ int initRootDir()
 	entry_p[0].size = 60;
 	entry_p[0].type = 'D';
 
-	printf("After root");
 
 	strcpy(entry_p[1].name, ".");
 	entry_p[1].size = entry_p[0].size + 60;
 	// entry_p[1].blockLocation =
 	entry_p[1].type = 'D';
 
-	printf("After entry 1");
 
 	strcpy(entry_p[2].name, "..");
 	entry_p[2].size = entry_p[1].size;
 	// entry_p[2].blockLocation =
 	entry_p[2].type = 'D';
-
-	printf("After entry 2");
 
 	//writing root directory
 	LBAwrite(entry_p, 6, 1);
