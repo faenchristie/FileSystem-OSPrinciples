@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
+#include <dirent.h> // the format of directory entries
 
 #include "fsLow.h"
 #include "mfs.h"
@@ -67,24 +68,22 @@ fdDir *fs_opendir(const char *name)
 
 /******************************************************************************
  *                      -----read a directory-----
+ * This function returns the next directory entry of the current directory entry.
  * 
  *****************************************************************************/
 struct fs_diriteminfo *fs_readdir(fdDir *dirp)
 {
-
-    // this function returns the next directory entry of the current directory entry.
-
-    // declare fs_firiteminfo, possibly as global variable?
-
-    // need some sort of way to check which child we are on. possibly the index
-    // of the entries? Might need to be global variable.
-
-    // loop through entries, find entry that is the child of this directory.
-
-    // first one found, set the fs_direiteminfo struct properties
-    // (length, fileType, name)
-
-    return 0;
+    // fs_diriteminfo in mfs.h
+    DIR *dir;
+    dir = (DIR *) dirp;
+    /** See: https://pubs.opengroup.org/onlinepubs/7908799/xsh/dirent.h.html */
+    struct dirent * di;
+    /** readdir() returns a pointer to a dirent structure showing the next dir entry
+     *  dirp is pointing to. Returns null if there's an error or at the end of dir
+     *  stream.
+     */
+    di = readdir(dir);
+    return ((struct mfs_diriteminfo *) di);
 }
 
 /******************************************************************************
@@ -169,5 +168,6 @@ int fs_stat(const char *path, struct fs_stat *buf)
     // check entries for path , declare that variable
 
     // use this to set all values of fs_stat struct
+    /** stat() displays file or file system status. */
     return 0;
 }
