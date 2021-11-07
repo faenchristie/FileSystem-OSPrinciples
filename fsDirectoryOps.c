@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <dirent.h> // the format of directory entries
+#include <sys/stat.h> // Utilizing the stat() function
 
 #include "fsLow.h"
 #include "mfs.h"
@@ -166,8 +167,10 @@ int fs_isDir(char *path)
 int fs_stat(const char *path, struct fs_stat *buf)
 {
     // check entries for path , declare that variable
-
+    struct stat * pstat; 
+    pstat = (struct stat *) buf;
     // use this to set all values of fs_stat struct
-    /** stat() displays file or file system status. */
-    return 0;
+    /** stat() displays file or file system status; returns 0 if successful. */
+    /** See: https://pubs.opengroup.org/onlinepubs/009696799/functions/stat.html */
+    return (stat(path, pstat));
 }
