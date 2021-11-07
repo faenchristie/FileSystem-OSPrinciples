@@ -93,8 +93,14 @@ struct fs_diriteminfo *fs_readdir(fdDir *dirp)
  *****************************************************************************/
 int fs_closedir(fdDir *dirp)
 {
-    // b_close ?
-    return 0;
+    // fdDir in mfs.h
+    DIR *dir;
+    dir = (DIR *) dirp;
+    /** Closedir() takes a pointer to a DIR referring to the open directory
+     *  stream desired to be closed. A return value of 0 is successful, -1 is
+     *  not.
+     */
+    return (closedir (dir));
 }
 
 /******************************************************************************
