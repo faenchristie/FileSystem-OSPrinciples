@@ -42,6 +42,7 @@ int fs_delete(char *filename)
  *****************************************************************************/
 int fs_mkdir(const char *pathname, mode_t mode)
 {
+
     // parse path in some way, find parent path
 
     // find free block space that will cover the amount needed in bitmap

@@ -27,7 +27,6 @@
 #include "fsDirectory.h"
 #include "fsFree.h"
 
-
 #define MAGICNUMBER 3141592654
 
 /******************************************************************************
@@ -52,6 +51,17 @@ char name[50];
 char type;
 int size;
 
+// global variable for VCB
+vcbStruct *vcb_p;
+
+// global variable for free space map to keep in memory
+char *freeMap;
+
+// fix this
+// we need to find how large this must be
+// potentially malloc/realloc?
+entryStruct *listOfEntries;
+
 int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 {
 	/**************************************************************************
@@ -65,19 +75,23 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	printf("Initializing File System with %lld blocks with a block size of %lld\n", numberOfBlocks, blockSize);
 	/* TODO: Add any code you need to initialize your file system. */
 
-	vcbStruct *vcb_p;
-	
 	printf("About to allocate %ld bytes for VCB\n", sizeof(vcbStruct));
 	vcb_p = malloc(blockSize);
 
 	LBAread(vcb_p, 1, 0);
 
-	if (vcb_p->signature != MAGICNUMBER) {
+	if (vcb_p->signature != MAGICNUMBER)
+	{
+		////////////// CHANGE LATER /////////////////
+		// list that will contain entries
+		// need to figure out precise allocation for this
+		listOfEntries = malloc(sizeof(entryStruct) * 100);
+		/////////////////////////////////////////////
 		printf("Signature did NOT match\n");
 		vcb_p->blockSize;
 		vcb_p->blockCount;
-		vcb_p->rootDir = initRootDir();
 		vcb_p->freeSpaceMap = initFreeSpace(numberOfBlocks, blockSize);
+		vcb_p->rootDir = initRootDir();
 		vcb_p->signature = MAGICNUMBER;
 		LBAwrite(vcb_p, 1, 0);
 	}

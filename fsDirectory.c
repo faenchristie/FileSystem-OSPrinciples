@@ -21,13 +21,12 @@
 #include "mfs.h"
 #include "fsEntry.h"
 #include "fsDirectory.h"
+#include "fsFree.c"
 
 entryStruct *entry_p;
 
 // some sort of way to keep track of our entries?
 //array of directory entries witht he size 5 * 512 which is 2,560 bytes
-entryStruct *listOfEntries[5 * BLOCKSIZE];
-
 
 /**********************************************************************
 * -----------------Initializing the root directory---------------------
@@ -43,35 +42,53 @@ entryStruct *listOfEntries[5 * BLOCKSIZE];
 int initRootDir()
 {
 	printf("-----Initializing the root directory-----\n");
-	entry_p = malloc(3000);
+
+	// size of entry multiplied by defined average entries
+	int entrySize = sizeof(entryStruct) * DIRENTRIES;
+
+	entry_p = malloc(entrySize);
+
+	// number of blocks needed for root dir based on malloc'd space.
+	// ceiling division
+	int blocksNeeded = ((entrySize + BLOCKSIZE - 1) / BLOCKSIZE);
+
+	// find free space
+	int free = findFreeBlocks(blocksNeeded); // parameter is amount of blocks needed for root
 
 	for (int i = 0; i < DIRENTRIES + 1; i++)
 	{
-		entry_p[i].blockLocation = 0;
+		entry_p[i].blockLocation = free; // location written into memory
 		strcpy(entry_p[i].name, "Entry");
 		entry_p[i].type = 'u'; // U = undefined
 		entry_p[i].size = 0;
 	}
-   
+
 	printf("After init entries");
 
 	strcpy(entry_p[0].name, "Root");
 	entry_p[0].blockLocation = BLOCKS + 1;
+	// change later
 	entry_p[0].size = 60;
 	entry_p[0].type = 'D';
 
-
 	strcpy(entry_p[1].name, ".");
+	// change later
 	entry_p[1].size = entry_p[0].size + 60;
 	// entry_p[1].blockLocation =
 	entry_p[1].type = 'D';
-
 
 	strcpy(entry_p[2].name, "..");
 	entry_p[2].size = entry_p[1].size;
 	// entry_p[2].blockLocation =
 	entry_p[2].type = 'D';
 
-	//writing root directory
-	LBAwrite(entry_p, 6, 1);
+	//writing root directory, "blocksNeeded" blocks starting at the free space returned to us by map
+	LBAwrite(entry_p, blocksNeeded, free);
+
+	/////////////////////////////////////
+	listOfEntries[0] = entry_p;
+	/////////////////////////////////////
+
+	// return location of root for VCB to store
+	return free;
 }

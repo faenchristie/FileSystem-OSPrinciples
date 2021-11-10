@@ -20,7 +20,11 @@
 #include "mfs.h"
 #include "fsFree.h"
 
-vcbStruct * vcb_p;
+///
+#include "fsInit.c"
+
+freeMapSize = 2560;
+
 /**********************************************************************
 * -----------------initializing the free space map---------------------
 * will first malloc the freespace map to be blocksize * 5 to allocate a
@@ -31,20 +35,46 @@ vcbStruct * vcb_p;
 * starting block number of the free space to the VCB initialization.
 * to indicate where the free space starts.
 **********************************************************************/
-int initFreeSpace(numberOfBlocks, blockSize) {
-    printf("-----Initializing the free space map-----\n");
-	vcb_p->freeSpaceMap = malloc(blockSize * 5); //free map now has 2560 bytes
+int initFreeSpace(numberOfBlocks, blockSize)
+{
+	printf("-----Initializing the free space map-----\n");
+
+	freeMap = malloc(blockSize * 5); // free map now has 2560 bytes
 
 	// marked as used
-	vcb_p->freeSpaceMap[0] = 1;
+	freeMap[0] = 1;
 
-	for (int i = 1; i < numberOfBlocks + 1; i++)
+	for (int i = 0; i < 6; i++)
 	{
-		// mark 1 - BLOCKS as free
-		vcb_p->freeSpaceMap[i] = 0;
+		freeMap[i] = 1; // mark 1-5 Blocks used, for VCB and freemap
 	}
 
-	LBAwrite(vcb_p, 1, 0);		  // write vcb to block 0
-	LBAwrite(vcb_p->freeSpaceMap, 5, 1); // write freeSpaceMap to blocks 1-5
-	vcb_p->freeMapStart = 1;
+	for (int i = 6; i < numberOfBlocks + 1; i++)
+	{
+		// mark 1 - BLOCKS as free
+		freeMap[i] = 0;
+	}
+
+	LBAwrite(vcb_p, 1, 0);	 // write vcb to block 0
+	LBAwrite(freeMap, 5, 1); // write freeSpaceMap to blocks 1-5
+
+	return 1; // return where free space map starts
+}
+
+// finds next free block in freespace map, returns it
+// parameter is how much blocks are required (the size of the file)
+int findFreeBlocks(int blocks)
+{
+	// EDIT THIS LATER TO CHECK IF ENOUGH BLOCKS ARE AT LOCATION //
+	int free = 0;
+
+	for (int i = 0; i < freeMapSize; i++)
+	{
+		if (freeMap[i] = 0)
+		{
+			free = i;
+		}
+	}
+
+	return free;
 }
