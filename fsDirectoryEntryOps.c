@@ -20,6 +20,11 @@
 #include <string.h>
 
 #include "mfs.h"
+#include "fsInit.c"
+#include "fsFree.h"
+#include "fsEntry.h"
+
+char currentDirectoryPath[200];
 
 /******************************************************************************
  * -----removes a file-----
@@ -27,11 +32,49 @@
  *****************************************************************************/
 int fs_delete(char *filename)
 {
+    int blocksUsed = 0;
+    int blockStart = 0;
+    // used to return error if file doesn't exist
+    int exists = 0;
+    int entryNo = 0;
     // search entry list for file
+    for (int i = 0; i < numberOfEntries; i++)
+    {
 
-    // find blocks it is using/number of blocks, set to 0
+        // temp solution to avoid checking null value and getting seg fault
+        if (listofEntries[i] != '\0')
+        {
+            // checks if the path matches
+        if(strcmp(listOfEntries[i].path,filename){
+                // set exist to true because we found the file
+                exists = 1;
+                entryNo = i;
+                // get info needed to delete entry from bitmap
+                blocksUsed = listOfEntries[i].blockCount;
+                blocksStart = listOfEntries[i].blockLocation;
+        }
+        }
+    }
 
-    // nullify entry in list
+    // if file not found, print error, exit
+    if (!exists)
+    {
+        printf("ERROR: FILE NOT FOUND\n");
+        return 0;
+    }
+
+    // if file found, loop through bitmap, marking bits as not used
+    if (exists)
+    {
+        for (int i = blocksStart; i < blocksUsed + 1; i++)
+        {
+            freeMap[i] = 0;
+        }
+        // nullify entry in list
+        listOfEntries[entryNo] = "\0";
+
+        printf("FILE DELETED\n");
+    }
 
     return 0;
 }
@@ -45,15 +88,39 @@ int fs_mkdir(const char *pathname, mode_t mode)
 
     // parse path in some way, find parent path
 
+    // malloc space needed: size of struct * average entries for directory
+    int entrySize = sizeof(entryStruct) * DIRENTRIES;
+    entryStruct entry_p = malloc(entrySize);
+
+    int blocksNeeded = ((entrySize + BLOCKSIZE - 1) / BLOCKSIZE);
+
     // find free block space that will cover the amount needed in bitmap
+    int blockNo = findFreeBlocks(blocksNeeded);
 
     // error code if not enough memory?
+    if (!blockNo)
+    {
+        printf('ERROR: NOT ENOUGH MEMORY\n');
+        return 0;
+    }
 
     // write to memory
+    LBAWrite(entry_p, blocksNeeded, blockNo);
 
     // update bitmap to signify used space
+    for (int i = blockNo; i < blocksNeeded + 1; i++)
+    {
+        freeMap[i] = 1;
+    }
 
     // assign all necessary values to the entry
+
+    // add it to list
+    listOfEntries[numberOfEntries] = entry_p;
+
+    // increment entry count for list
+    numberOfEntries++;
+
     return 0;
 }
 
@@ -65,11 +132,46 @@ int fs_rmdir(const char *pathname)
 {
     // parse pathname
 
+    int blockNo;
+    int totalBlocks;
+    int entryNo;
+    // bool to check if path exists
+    int found = 0;
+
     // find directory of the pathname in our list of entries
+    for (int i = 0; i < numberOfEntries; i++)
+    {
+        // temp solution to avoid checking null value and getting seg fault
+        if (listofEntries[i] != '\0')
+        {
+            if (strcmp(pathname, listOfEntries[i].path))
+            {
+                blockNo = listOfEntries[i].blockLocation;
+                totalBlocks = listOfEntries[i].blockCount;
+                entryNo = i;
+                // set found to true
+                found = 1;
+            }
+        }
+    }
+
+    if (!found)
+    {
+        printf("DIRECTORY DOES NOT EXIST\n");
+        return 0;
+    }
+
+    printf("DIRECTORY DELETED\n");
 
     // mark bitmap space to 0 to signify space is free
+    for (int i = blockNo; i < totalBlocks + 1; i++)
+    {
+        freeMap[i] = 0;
+    }
 
     // find entry, nullify
+    listOfEntries[entryNo] = "\0";
+
     return 0;
 }
 
@@ -79,13 +181,17 @@ int fs_rmdir(const char *pathname)
  *****************************************************************************/
 char *fs_getcwd(char *buf, size_t size)
 {
-    // set some sort of variable for cwd?
+    if (strlen(currentDirectoryPath > size))
+    {
+        // sizes too long, print error
+        printf("ERROR PATH TOO LONG\n");
+        return 0;
+    }
 
-    // copy cwd path to buf?
+    // copy path of cwd to buffer to be returned
+    strcpy(buf, currentDirectoryPath);
 
-    // return buf
-
-    return 0;
+    return buf;
 }
 
 /******************************************************************************
@@ -94,11 +200,36 @@ char *fs_getcwd(char *buf, size_t size)
  *****************************************************************************/
 int fs_setcwd(char *buf)
 {
+    /// ***************** WORK ON THIS ******************///
     // parse file path
 
     // search for directory based on path
+    // boolean
+    int found = 0;
+    for (int i = 0; i < numberOfEntries; i++)
+    {
+        // temp solution to avoid checking null value and getting seg fault
+        if (listofEntries != '\0')
+        {
+            if (strcmp(listOfEntries[i].path, buf))
+            {
+                found = 1;
+            }
+        }
+    }
 
-    // set cwd variable to path ?
+    // DIRECTORY NOT FOUND
+    if (!found)
+    {
+        printf("DIRECTORY NOT FOUND\n");
+        return 0;
+    }
 
-    return 0;
+    // clear old path
+    currentDirectoryPath = '\0';
+
+    // set new CWD
+    strcpy(currentDirectoryPath, buf);
+
+    return 1;
 }

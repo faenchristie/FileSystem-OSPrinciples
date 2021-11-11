@@ -69,6 +69,7 @@ int initRootDir()
 	entry_p[0].blockLocation = BLOCKS + 1;
 	// change later
 	entry_p[0].size = 60;
+	entry_p[0].blockCount = blocksNeeded;
 	entry_p[0].type = 'D';
 
 	strcpy(entry_p[1].name, ".");
@@ -86,7 +87,10 @@ int initRootDir()
 	LBAwrite(entry_p, blocksNeeded, free);
 
 	/////////////////////////////////////
+	// add to entry list
 	listOfEntries[0] = entry_p;
+	// increment amount of entries
+	numberOfEntries++;
 	/////////////////////////////////////
 
 	// return location of root for VCB to store

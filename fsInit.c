@@ -61,6 +61,7 @@ char *freeMap;
 // we need to find how large this must be
 // potentially malloc/realloc?
 entryStruct *listOfEntries;
+int numberOfEntries = 0;
 
 int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 {
