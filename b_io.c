@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include "fsLow.h"
 #include "b_io.h"
 
 #define MAXFCBS 20
@@ -132,7 +133,9 @@ int b_write(b_io_fd fd, char *buffer, int count)
 //  +-------------+------------------------------------------------+--------+
 int b_read(b_io_fd fd, char *buffer, int count)
 {
-
+	int bytesRead, bytesReturned; // for what we read and what we will return
+	int part1, part2, part3;
+	int blocksToCopy, leftoverBytes; // holds blocks needed to copy and how many bytes are left in buffer
 	if (startup == 0)
 		b_init(); //Initialize our system
 
@@ -142,7 +145,57 @@ int b_read(b_io_fd fd, char *buffer, int count)
 		return (-1); //invalid file descriptor
 	}
 
-	return (0); //Change this
+	leftoverBytes = fcbArray[fd].buflen - fcbArray[fd].index; // remaining bytes available in buffer
+
+	if (leftoverBytes >= count) // Check if there is enough bytes in buffer
+	{
+		part1 = count; // No need to set part 2 and 3 if there are enough bytes in buffer.
+		part2 = 0, part3 = 0;
+	}
+	else 
+	{
+		part1 = leftoverBytes; // First read
+
+		part3 = count - leftoverBytes; // part3 holds how many bytes that still need to be copied to buffer
+
+		// Calculate how many 512 byte chunks are needed to be copied
+		blocksToCopy = part3 / B_CHUNK_SIZE; 
+		part2 = blocksToCopy * B_CHUNK_SIZE; 
+
+		part3 = part3 - part2; // Leftover bytes from part2 that didn't fit the 512 byte chunk size
+	}
+
+	if (part1 > 0) // memcpy to buffer with the part1 size, and then increment index with part1's size
+	{
+		memcpy(buffer, fcbArray[fd].buf + fcbArray[fd].index, part1);
+		fcbArray[fd].index = fcbArray[fd].index + part1;
+	}
+	if (part2 > 0)
+	{
+		// bytesRead = LBAread(buffer + part1, blocksToCopy, fcbArray[fd].currentBlk + fcbArray[fd].fi->location);
+		// fcbArray[fd].currentBlk += blocksToCopy;
+		part2 = bytesRead;
+	}
+	if (part3 > 0)
+	{
+		// bytesRead = LBAread(fcbArray[fd].buf, 1, fcbArray[fd].currentBlk + fcbArray[fd].fi->location);
+		// fcbArray[fd].currentBlk += 1;
+		fcbArray[fd].index = 0;
+		fcbArray[fd].buflen = bytesRead;
+
+		if (bytesRead < part3) 
+		{
+			part3 = bytesRead;
+		}
+
+		if (part3 > 0) 
+		{
+			memcpy(buffer + part1 + part2, fcbArray[fd].buf + fcbArray[fd].index, part3);
+			fcbArray[fd].index = fcbArray[fd].index + part3;
+		}
+	}
+	bytesReturned = part1 + part2 + part3;
+	return (bytesReturned);
 }
 
 // Interface to Close the file
