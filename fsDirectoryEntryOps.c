@@ -6,7 +6,7 @@
 * Group Name: Arrays of Dread
 * Project: Basic File System
 *
-* File: fsDirectoryEntryOps.h
+* File: fsDirectoryEntryOps.c
 *
 * Description: File containing functions for directory entry
 * operations including delete, make directory, remove, and cwd
