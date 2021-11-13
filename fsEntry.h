@@ -26,5 +26,5 @@ typedef struct
     // added :
     int blockCount; // counts number of logical blocks used
     int parent;     // need some way of tracking parent location
-    char path[200];
+    char *path;
 } entryStruct, *entryStruct_p;

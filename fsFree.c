@@ -35,7 +35,7 @@ freeMapSize = 2560;
 * starting block number of the free space to the VCB initialization.
 * to indicate where the free space starts.
 **********************************************************************/
-int initFreeSpace(numberOfBlocks, blockSize)
+int initFreeSpace(uint64_t numberOfBlocks, uint64_t blockSize)
 {
 	printf("-----Initializing the free space map-----\n");
 
@@ -79,7 +79,7 @@ int findFreeBlocks(int blocksNeeded)
 			for(int j=free+1; j<freeMapSize; j++){
 				// break inner for loop either when we found a used space
 				// or we found enough freeBlocks. 
-				if(freeMap[j]=1||freeBlocks=blocksNeeded){
+				if(freeMap[j]==1||blocksNeeded==freeBlocks){
 					break;
 				}
 				freeBlocks++;

@@ -22,7 +22,7 @@
 #include "mfs.h"
 #include "fsInit.c"
 #include "fsFree.h"
-#include "fsEntry.h"
+//#include "fsEntry.h"
 
 char currentDirectoryPath[200];
 
@@ -38,6 +38,11 @@ int fs_delete(char *filename)
     int exists = 0;
     int entryNo = 0;
     // search entry list for file
+
+    //*****************************************************************//
+    // CHANGE TO USE NEW DIRECTORY FINDING FUNC
+    //******************************************************************//
+    /*
     for (int i = 0; i < numberOfEntries; i++)
     {
 
@@ -45,7 +50,7 @@ int fs_delete(char *filename)
         if (listofEntries[i] != '\0')
         {
             // checks if the path matches
-        if(strcmp(listOfEntries[i].path,filename){
+        if(strcmp(listOfEntries[i].path,filename)){
                 // set exist to true because we found the file
                 exists = 1;
                 entryNo = i;
@@ -54,7 +59,7 @@ int fs_delete(char *filename)
                 blocksStart = listOfEntries[i].blockLocation;
         }
         }
-    }
+    }*/
 
     // if file not found, print error, exit
     if (!exists)
@@ -66,12 +71,12 @@ int fs_delete(char *filename)
     // if file found, loop through bitmap, marking bits as not used
     if (exists)
     {
-        for (int i = blocksStart; i < blocksUsed + 1; i++)
+        for (int i = blockStart; i < blocksUsed + 1; i++)
         {
             freeMap[i] = 0;
         }
         // nullify entry in list
-        listOfEntries[entryNo] = "\0";
+       // listOfEntries[entryNo] = "\0";
 
         printf("FILE DELETED\n");
     }
@@ -90,7 +95,8 @@ int fs_mkdir(const char *pathname, mode_t mode)
 
     // malloc space needed: size of struct * average entries for directory
     int entrySize = sizeof(entryStruct) * DIRENTRIES;
-    entryStruct entry_p = malloc(entrySize);
+    entryStruct * entry_p;
+    entry_p = malloc(entrySize);
 
     int blocksNeeded = ((entrySize + BLOCKSIZE - 1) / BLOCKSIZE);
 
@@ -115,11 +121,13 @@ int fs_mkdir(const char *pathname, mode_t mode)
 
     // assign all necessary values to the entry
 
+    // FIX !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    
     // add it to list
-    listOfEntries[numberOfEntries] = entry_p;
+    //listOfEntries[numberOfEntries] = entry_p;
 
     // increment entry count for list
-    numberOfEntries++;
+    //numberOfEntries++;
 
     return 0;
 }
@@ -137,7 +145,10 @@ int fs_rmdir(const char *pathname)
     int entryNo;
     // bool to check if path exists
     int found = 0;
-
+    /************************************************************************/
+    // CHANGE TO USE NEW FIND DIR FUNC
+    /*************************************************************************/
+/*
     // find directory of the pathname in our list of entries
     for (int i = 0; i < numberOfEntries; i++)
     {
@@ -153,7 +164,7 @@ int fs_rmdir(const char *pathname)
                 found = 1;
             }
         }
-    }
+    }*/
 
     if (!found)
     {
@@ -170,7 +181,7 @@ int fs_rmdir(const char *pathname)
     }
 
     // find entry, nullify
-    listOfEntries[entryNo] = "\0";
+    //listOfEntries[entryNo] = "\0";
 
     return 0;
 }
@@ -206,6 +217,12 @@ int fs_setcwd(char *buf)
     // search for directory based on path
     // boolean
     int found = 0;
+
+    //*****************************************************************//
+    // CHANGE TO USE NEW FIND DIR FUNC
+    //******************************************************************//
+
+    /*
     for (int i = 0; i < numberOfEntries; i++)
     {
         // temp solution to avoid checking null value and getting seg fault
@@ -216,7 +233,7 @@ int fs_setcwd(char *buf)
                 found = 1;
             }
         }
-    }
+    }*/
 
     // DIRECTORY NOT FOUND
     if (!found)
@@ -226,7 +243,10 @@ int fs_setcwd(char *buf)
     }
 
     // clear old path
-    currentDirectoryPath = '\0';
+    /**********************************************/
+    // FIND PROPER WAY TO CLEAR
+    /*********************************************/
+    // currentDirectoryPath = NULL;
 
     // set new CWD
     strcpy(currentDirectoryPath, buf);

@@ -19,9 +19,10 @@
 
 #include "fsLow.h"
 #include "mfs.h"
-#include "fsEntry.h"
+//#include "fsEntry.h"
 #include "fsDirectory.h"
-#include "fsFree.c"
+#include "fsFree.h"
+#include "fsInit.c"
 
 entryStruct *entry_p;
 
@@ -118,9 +119,9 @@ int initRootDir()
 
 	/////////////////////////////////////
 	// add to entry list
-	listOfEntries[0] = entry_p;
+	//listOfEntries[0] = entry_p;
 	// increment amount of entries
-	numberOfEntries++;
+	//numberOfEntries++;
 	/////////////////////////////////////
 
 	// return location of root for VCB to store

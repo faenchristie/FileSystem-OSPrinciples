@@ -14,4 +14,4 @@
 
 int initFreeSpace(uint64_t numberOfBlocks, uint64_t blockSize);
 
-int findFreeBlocks(int blocks);
+int findFreeBlocks(int blocksNeeded);
