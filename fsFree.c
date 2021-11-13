@@ -63,18 +63,36 @@ int initFreeSpace(numberOfBlocks, blockSize)
 
 // finds next free block in freespace map, returns it
 // parameter is how much blocks are required (the size of the file)
-int findFreeBlocks(int blocks)
+int findFreeBlocks(int blocksNeeded)
 {
-	// EDIT THIS LATER TO CHECK IF ENOUGH BLOCKS ARE AT LOCATION //
-	int free = 0;
+	// this is the variable we will hold our free space location at 
+	int freeStart = 0;
+	// this will keep track of if there are enough free blocks at that location
+	int freeBlocks = 0;
 
-	for (int i = 0; i < freeMapSize; i++)
-	{
-		if (freeMap[i] = 0)
-		{
-			free = i;
+	// loop through free map
+	for(int i=0; i<freeMapSize; i++){
+		// if we found a free space, start inner loop
+		if(freeMap[i]=0){
+			// inner loop will begin. This will keep track of how many free spaces we have
+			// IN A ROW.
+			for(int j=free+1; j<freeMapSize; j++){
+				// break inner for loop either when we found a used space
+				// or we found enough freeBlocks. 
+				if(freeMap[j]=1||freeBlocks=blocksNeeded){
+					break;
+				}
+				freeBlocks++;
+			}
 		}
+		// if enough freeBlocks are found at this freeStart location, break loop
+		if(freeBlocks=blocksNeeded){
+			break;
+		}
+		// reinitialize freeBlocks for next inner loop.
+		freeBlocks = 0;
+		freeStart++;
 	}
-
-	return free;
+	// return the start of our free spot.
+	return freeStart;
 }

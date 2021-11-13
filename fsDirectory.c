@@ -55,6 +55,36 @@ int initRootDir()
 	// find free space
 	int free = findFreeBlocks(blocksNeeded); // parameter is amount of blocks needed for root
 
+    // "." directory, or first entry, is just a pointer to the current directory.
+	strcpy(entry_p[0].name,".");
+	// block location of root is the free space we found.
+	entry_p[0].blockLocation = free;
+	// amount of blocks root takes up 
+	entry_p[0].blockCount = blocksNeeded; 
+	entry_p[0].size = entrySize;
+	entry_p[0].type = 'd'; // directory
+	// path of root directory
+	entry_p[0].path="/";
+
+	// second entry is the same as first because root does not have a parent 
+	// except the name is ".."
+	strcpy(entry_p[1].name,"..");
+    entry_p[1].blockLocation = free;
+	entry_p[1].blockCount = blocksNeeded;
+	entry_p[1].size = entrySize;
+	entry_p[1].type = 'd';
+	entry_p[1].path="/";
+
+	// other directories will be initialized when made.
+	// when you make a directory, you will update block location and other
+	// necessary information, and marked them as used.
+	for(int i=2; i< DIRENTRIES-2; i++){
+		// marked as undefined. We can use this to see what entries
+		// are being used inside our directory.
+		entry_p[i].type = 'u';
+	}
+	
+     /*
 	for (int i = 0; i < DIRENTRIES + 1; i++)
 	{
 		entry_p[i].blockLocation = free; // location written into memory
@@ -81,7 +111,7 @@ int initRootDir()
 	strcpy(entry_p[2].name, "..");
 	entry_p[2].size = entry_p[1].size;
 	// entry_p[2].blockLocation =
-	entry_p[2].type = 'D';
+	entry_p[2].type = 'D';*/
 
 	//writing root directory, "blocksNeeded" blocks starting at the free space returned to us by map
 	LBAwrite(entry_p, blocksNeeded, free);
