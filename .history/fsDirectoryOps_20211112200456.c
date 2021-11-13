@@ -68,52 +68,12 @@ int getArrLength(char *arr)
 
 /******************************************************************************
  *               -----Finds entry based on parsed path-----
- * Takes char array with parsed path as parameter and length of array.
- *  Reads through parsed path one name at a time. Starts by opening root directory. 
- * Returns a pointer to an array of entries.
+ * Takes char array with parsed path as parameter. Reads through parsed path
+ * one name at a time. Starts by opening root directory.
  *****************************************************************************/
 
-entryStruct getEntryFromPath(char *arr, int arrLength){
+entryStruct getEntryFromPath(char *arr){
 
-    entryStruct *entry_p;
-
-    entryStruct *tempEntry;
-
-    // read in root directory into entry_p. 
-    LBAread(entry_p,vcb_p->rootDirBlocks,vcb_p->rootDir);
-
-    // first for loop loops through each segment of the path
-    for(int i=0; i<arrLength; i++){
-        // inner for loop loops through each entry of the directory
-        for(int j=0; j<DIRENTRIES; j++){
-
-            // ******************** //
-            // NOTE: Should I check if value is null to avoid segfault?
-            // ******************** //
-
-            // compares the path name to the name of each directory entry
-            if(strcmp(entry_p[j].name,arr[i])){
-                // read next directory into tempEntry if matches
-                LBAread(tempEntry,entry_p[j].blockCount, entry_p[j].blockLocation);
-                // move onto next entry
-                entry_p = tempEntry;
-            }
-            else{
-                // make entry_p null if not found. This will be used to check
-                // if the directory was found. 
-                entry_p = NULL;
-            }
-        }
-        // once done looping through, check if next entry was found
-        if(entry_p=NULL){
-            // no entry of this name was found, hence it is NULL.
-            // print error, return.
-            printf("DIRECTORY NOT FOUND\n");
-            return -1;
-        }
-    }
-
-    return entry_p;
 }
 
 
@@ -188,8 +148,6 @@ fdDir *fs_opendir(const char *name)
  *****************************************************************************/
         int fs_isFile(char *path)
         {
-    
-            /*
             int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
             entryStruct *entry_p;
             // look for path in entries
@@ -199,21 +157,9 @@ fdDir *fs_opendir(const char *name)
                 {
                     entry_p = entries[i];
                 }
-            }*/
+            }
 
-            entryStruct *entry_p;
-
-            // parse path
-            char *parsedPath = parsePath(path);
-
-            // get length of parsed path (used for next function)
-            int pathLength = getArrLength(parsedPath);
-
-            // get entry using functions
-            entry_p = getEntryFromPath(parsedPath,pathLength);
-
-    // case insensitive string compare, see if file. return 1 if file
-    if(strcasecmp(entry_p->type, "f"){
+    if(strcmp(entry_p->type, "F"){
                 return 1;
     }
 
@@ -233,7 +179,6 @@ fdDir *fs_opendir(const char *name)
  *****************************************************************************/
         int fs_isDir(char *path)
         {
-            /*
             int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
             entryStruct *entry_p;
             // look for path in entries
@@ -243,18 +188,7 @@ fdDir *fs_opendir(const char *name)
                 {
                     entry_p = entries[i];
                 }
-            }*/
-
-            entryStruct *entry_p;
-
-            // parse path
-            char *parsedPath = parsePath(path);
-
-            // get length of parsed path (used for next function)
-            int pathLength = getArrLength(parsedPath);
-
-            // get entry using functions
-            entry_p = getEntryFromPath(parsedPath,pathLength);
+            }
 
     if(strcmp(entry_p->type, "D"){
                 return 1;

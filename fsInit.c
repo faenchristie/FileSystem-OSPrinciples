@@ -38,7 +38,10 @@ typedef struct
 {
 	int blockSize;
 	int blockCount;
+	// location of rootdir starting block
 	int rootDir;
+	// amount of blocks rootDir takes up
+	int rootDirBlocks;
 	int freeSpaceMap;
 	unsigned int signature;
 } vcbStruct, *vcbStruct_p;
@@ -93,6 +96,7 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 		vcb_p->blockCount;
 		vcb_p->freeSpaceMap = initFreeSpace(numberOfBlocks, blockSize);
 		vcb_p->rootDir = initRootDir();
+		vcb_p->rootDirBlocks = sizeof(entryStruct) * DIRENTRIES;
 		vcb_p->signature = MAGICNUMBER;
 		LBAwrite(vcb_p, 1, 0);
 	}

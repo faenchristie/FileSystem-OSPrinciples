@@ -233,7 +233,6 @@ fdDir *fs_opendir(const char *name)
  *****************************************************************************/
         int fs_isDir(char *path)
         {
-            /*
             int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
             entryStruct *entry_p;
             // look for path in entries
@@ -243,18 +242,7 @@ fdDir *fs_opendir(const char *name)
                 {
                     entry_p = entries[i];
                 }
-            }*/
-
-            entryStruct *entry_p;
-
-            // parse path
-            char *parsedPath = parsePath(path);
-
-            // get length of parsed path (used for next function)
-            int pathLength = getArrLength(parsedPath);
-
-            // get entry using functions
-            entry_p = getEntryFromPath(parsedPath,pathLength);
+            }
 
     if(strcmp(entry_p->type, "D"){
                 return 1;

@@ -86,11 +86,6 @@ entryStruct getEntryFromPath(char *arr, int arrLength){
     for(int i=0; i<arrLength; i++){
         // inner for loop loops through each entry of the directory
         for(int j=0; j<DIRENTRIES; j++){
-
-            // ******************** //
-            // NOTE: Should I check if value is null to avoid segfault?
-            // ******************** //
-
             // compares the path name to the name of each directory entry
             if(strcmp(entry_p[j].name,arr[i])){
                 // read next directory into tempEntry if matches
@@ -188,8 +183,6 @@ fdDir *fs_opendir(const char *name)
  *****************************************************************************/
         int fs_isFile(char *path)
         {
-    
-            /*
             int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
             entryStruct *entry_p;
             // look for path in entries
@@ -199,21 +192,9 @@ fdDir *fs_opendir(const char *name)
                 {
                     entry_p = entries[i];
                 }
-            }*/
+            }
 
-            entryStruct *entry_p;
-
-            // parse path
-            char *parsedPath = parsePath(path);
-
-            // get length of parsed path (used for next function)
-            int pathLength = getArrLength(parsedPath);
-
-            // get entry using functions
-            entry_p = getEntryFromPath(parsedPath,pathLength);
-
-    // case insensitive string compare, see if file. return 1 if file
-    if(strcasecmp(entry_p->type, "f"){
+    if(strcmp(entry_p->type, "F"){
                 return 1;
     }
 
@@ -233,7 +214,6 @@ fdDir *fs_opendir(const char *name)
  *****************************************************************************/
         int fs_isDir(char *path)
         {
-            /*
             int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
             entryStruct *entry_p;
             // look for path in entries
@@ -243,18 +223,7 @@ fdDir *fs_opendir(const char *name)
                 {
                     entry_p = entries[i];
                 }
-            }*/
-
-            entryStruct *entry_p;
-
-            // parse path
-            char *parsedPath = parsePath(path);
-
-            // get length of parsed path (used for next function)
-            int pathLength = getArrLength(parsedPath);
-
-            // get entry using functions
-            entry_p = getEntryFromPath(parsedPath,pathLength);
+            }
 
     if(strcmp(entry_p->type, "D"){
                 return 1;
