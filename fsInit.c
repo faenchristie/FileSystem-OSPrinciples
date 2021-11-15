@@ -31,14 +31,11 @@
  * each blocks, how many free blocks are there, etc.
  * uint64_t is an unsigned integer of 64 bits
  *****************************************************************************/
-typedef struct
-{
+typedef struct {
 	int blockSize;
 	int blockCount;
-	// location of rootdir starting block
-	int rootDir;
-	// amount of blocks rootDir takes up
-	int rootDirBlocks;
+	int rootDir; // location of rootdir starting block
+	int rootDirBlocks; // amount of blocks rootDir takes up
 	int freeSpaceMap;
 	unsigned int signature;
 } vcbStruct, *vcbStruct_p;
@@ -52,12 +49,9 @@ int blockLocation;
 char name[50];
 char type;
 int size;
-
-// global variable for VCB
-vcbStruct *vcb_p;
-
-// global variable for free space map to keep in memory
-char *freeMap;
+vcbStruct *vcb_p; // global variable for VCB
+char *freeMap; // global variable for free space map to keep in memory
+int freeMapSize = 2560;
 
 // fix this
 // we need to find how large this must be
@@ -66,22 +60,9 @@ char *freeMap;
 //int numberOfEntries = 0;
 
 
-int freeMapSize = 2560;
-
-/**********************************************************************
-* -----------------initializing the free space map---------------------
-* will first malloc the freespace map to be blocksize * 5 to allocate a
-* total of 2560 bytes. Next will mark which blocks are used and not 
-* used, block 0 is reserved for the VCB while block 1-5 inclusive will
-* be utilized for the free space map that was created. Next, will call 
-* an LBAwrite to write the data to disk, and then finally return the 
-* starting block number of the free space to the VCB initialization.
-* to indicate where the free space starts.
-**********************************************************************/
 // finds next free block in freespace map, returns it
 // parameter is how much blocks are required (the size of the file)
-int findFreeBlocks(int blocksNeeded)
-{
+int findFreeBlocks(int blocksNeeded) {
 	// this is the variable we will hold our free space location at 
 	int freeStart = 0;
 	// this will keep track of if there are enough free blocks at that location
@@ -174,7 +155,7 @@ int initRootDir(uint64_t blockSize)
 		entry_p[i].type = 'u';
 	}
 
-     /*
+    /*
 	for (int i = 0; i < DIRENTRIES + 1; i++)
 	{
 		entry_p[i].blockLocation = free; // location written into memory
@@ -250,25 +231,21 @@ int initFreeSpace(uint64_t numberOfBlocks, uint64_t blockSize)
 	return 1; // return where free space map starts
 }
 
+/**************************************************************************
+* --------------------Initializing the file system-------------------------
+* First, store a mallaoc of blocksize into the vcb pointer variable,
+* then calling an LBAread, with block 0. 
+* Next, check if the magic number number in the structure matches with the 
+* pointer. If they magic numbers do not match, the initialization will
+* occur for the VCB, freespace, and the root directory.
+**************************************************************************/
+int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize) {
 
-int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
-{
-	/**************************************************************************
-	* --------------------Initializing the file system-------------------------
-	* First, store a mallaoc of blocksize into the vcb pointer variable,
-	* then calling an LBAread, with block 0. 
-	* Next, check if the magic number number in the structure matches with the 
-	* pointer. If they magic numbers do not match, the initialization will
-	* occur for the VCB, freespace, and the root directory.
-	**************************************************************************/
 	printf("Initializing File System with %lu blocks with a block size of %lu\n", numberOfBlocks, blockSize);
-	/* TODO: Add any code you need to initialize your file system. */
-
 	printf("About to allocate %ld bytes for VCB\n", sizeof(vcbStruct));
 
 	vcb_p = malloc(5*blockSize);
 	
-
 	LBAread(vcb_p, 1, 0);
 
 	if (vcb_p->signature != MAGICNUMBER)

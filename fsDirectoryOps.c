@@ -185,7 +185,7 @@ int fs_closedir(fdDir *dirp)
     return 0;
 }
 
-       /******************************************************************************
+/******************************************************************************
  *  b_close();   -----check if it is a file or not-----
  * First, we created a variable for the length of our array in order to
  * traverse using a for loop. Next, inside the For loop there will need to be
@@ -230,7 +230,7 @@ int fs_closedir(fdDir *dirp)
     }
         }
 
-   /******************************************************************************
+/******************************************************************************
  *                 -----check if it is a directory or not-----                  
  * First, we created a variable for the length of our array in order to
  * traverse using a for loop. Next, inside the For loop there will need to be
@@ -239,39 +239,36 @@ int fs_closedir(fdDir *dirp)
  * which refers to the fact that it is a directory. Returning 1 if it is, or 0
  * if it is not a directory.
  *****************************************************************************/
-        int fs_isDir(char *path)
+    int fs_isDir(char *path) {
+        /*
+        int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
+        entryStruct *entry_p;
+        // look for path in entries
+        for (int i = 0; i < entriesLength; i++)
         {
-            /*
-            int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
-            entryStruct *entry_p;
-            // look for path in entries
-            for (int i = 0; i < entriesLength; i++)
+            if (strcmp(entries[i].path, path))
             {
-                if (strcmp(entries[i].path, path))
-                {
-                    entry_p = entries[i];
-                }
-            }*/
+                entry_p = entries[i];
+            }
+        }*/
 
-            entryStruct *entry_p;
+        entryStruct *entry_p;
 
-            // parse path
-            char *parsedPath = parsePath(path);
+        // parse path
+        char *parsedPath = parsePath(path);
 
-            // get length of parsed path (used for next function)
-            int pathLength = getArrLength(parsedPath);
+        // get length of parsed path (used for next function)
+        int pathLength = getArrLength(parsedPath);
 
-            // get entry using functions
-            entry_p = getEntryFromPath(parsedPath,pathLength);
+        // get entry using functions
+        entry_p = getEntryFromPath(parsedPath,pathLength);
 
-    if(strcmp(entry_p->type, "D")){
-                return 1;
-    }
-
-    else{
-                return 0;
-    }
+        if(strcmp(entry_p->type, "D")){
+            return 1;
+        } else{
+            return 0;
         }
+    }
 
 /******************************************************************************
  * 
