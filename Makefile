@@ -43,7 +43,7 @@ CFLAGS= -g -I.
 LIBS =pthread
 DEPS = 
 # Add any additional objects to this list
-ADDOBJ= fsInit.o fsFree.o fsDirectory.o fsDirectoryOps.o fsDirectoryEntryOps.o b_io.o
+ADDOBJ=  b_io.o
 ARCH = $(shell uname -m)
 
 ifeq ($(ARCH), aarch64)
@@ -65,3 +65,6 @@ clean:
 
 run: $(ROOTNAME)$(HW)$(FOPTION)
 	./$(ROOTNAME)$(HW)$(FOPTION) $(RUNOPTIONS)
+
+test:
+	valgrind --leak-check=yes ./$(ROOTNAME)$(HW)$(FOPTION) $(RUNOPTIONS)

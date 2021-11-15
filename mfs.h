@@ -21,6 +21,9 @@
 #include "b_io.h"
 
 #include <dirent.h>
+
+#include "fsInit.c"
+
 #define FT_REGFILE DT_REG
 #define FT_DIRECTORY DT_DIR
 #define FT_LINK DT_LNK
@@ -37,6 +40,14 @@ typedef u_int32_t uint32_t;
 #define BLOCKSIZE 512
 #define DEFAULTSIZE 2442
 #define BLOCKS DEFAULTSIZE / BLOCKSIZE
+
+// ************ TEAM ADDED FUNCTIONS ****************** //
+
+char * parsePath(char *path);
+int getArrLength(char *arr);
+entryStruct *getEntryFromPath(char *arr, int arrLength);
+
+// **************************************************** //
 
 // This structure is returned by fs_readdir to provide the caller with information
 // about each file as it iterates through a directory

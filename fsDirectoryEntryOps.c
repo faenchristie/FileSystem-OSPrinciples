@@ -22,6 +22,7 @@
 #include "mfs.h"
 #include "fsInit.c"
 #include "fsFree.h"
+//#include "fsLow.h"lbawrti
 //#include "fsEntry.h"
 
 char currentDirectoryPath[200];
@@ -111,7 +112,7 @@ int fs_mkdir(const char *pathname, mode_t mode)
     }
 
     // write to memory
-    LBAWrite(entry_p, blocksNeeded, blockNo);
+    LBAwrite(entry_p, blocksNeeded, blockNo);
 
     // update bitmap to signify used space
     for (int i = blockNo; i < blocksNeeded + 1; i++)
@@ -122,7 +123,7 @@ int fs_mkdir(const char *pathname, mode_t mode)
     // assign all necessary values to the entry
 
     // FIX !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    
+
     // add it to list
     //listOfEntries[numberOfEntries] = entry_p;
 
@@ -138,13 +139,29 @@ int fs_mkdir(const char *pathname, mode_t mode)
  *****************************************************************************/
 int fs_rmdir(const char *pathname)
 {
-    // parse pathname
-
+    // block that entry starts at
     int blockNo;
+    // total blocks it uses
     int totalBlocks;
-    int entryNo;
+    
+    //int entryNo;
     // bool to check if path exists
     int found = 0;
+
+    // parse file path
+    char *parsedPath = parsePath(pathname);
+
+    // get length of array (used for getentry function)
+    int pathLength = getArrLength(parsedPath);
+
+    entryStruct *entry_p = getEntryFromPath(parsedPath, pathLength);
+
+    if(entry_p!=NULL){
+        found = 1;
+    }
+
+
+
     /************************************************************************/
     // CHANGE TO USE NEW FIND DIR FUNC
     /*************************************************************************/
@@ -166,12 +183,14 @@ int fs_rmdir(const char *pathname)
         }
     }*/
 
+    // if directory is not found, print error, return
     if (!found)
     {
         printf("DIRECTORY DOES NOT EXIST\n");
         return 0;
     }
 
+    // print if deleted
     printf("DIRECTORY DELETED\n");
 
     // mark bitmap space to 0 to signify space is free
@@ -179,9 +198,6 @@ int fs_rmdir(const char *pathname)
     {
         freeMap[i] = 0;
     }
-
-    // find entry, nullify
-    //listOfEntries[entryNo] = "\0";
 
     return 0;
 }
