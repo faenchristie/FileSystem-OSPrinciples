@@ -46,18 +46,19 @@
 }
 
 /******************************************************************************
- *                        -----returns length of arr-----
- * Takes a char array as input and returns the length of it. This will be
- * used to dissect the parent path. Returns int length.
+ *                        -----get arr length-----
+ * This will be used to dissect the parent path.
+ * Takes a char array as input and returns the length of it. 
+ * set the count to 0 to track the length
+ * a while loop will trigger until null is found
+ * finally it will return the count, int length
  *****************************************************************************/
 
-int getArrLength(char *arr)
-{
-    // tracks length
+int getArrLength(char *arr) {
+
     int count = 0;
-    // will go until null is found
-    while (arr[count] != "\0")
-    {
+
+    while (arr[count] != "\0") {
         count++;
     }
     return count;
@@ -66,14 +67,13 @@ int getArrLength(char *arr)
 /******************************************************************************
  *               -----Finds entry based on parsed path-----
  * Takes char array with parsed path as parameter and length of array.
- *  Reads through parsed path one name at a time. Starts by opening root directory. 
+ * Reads through parsed path one name at a time. Starts by opening root directory. 
  * Returns a pointer to an array of entries.
  *****************************************************************************/
 
 entryStruct * getEntryFromPath(char *arr, int arrLength){
 
     entryStruct *entry_p;
-
     entryStruct *tempEntry;
 
     // read in root directory into entry_p. 
@@ -114,14 +114,20 @@ entryStruct * getEntryFromPath(char *arr, int arrLength){
 }
 
 /******************************************************************************
- *                   -----opens a directory-----
+ *                      -----open directory-----
+ * This function will open the designated directory from the parameter
  * 
+ * create a file descriptor variable of type int
+ * create pointer to openDir
+ * call b_open function
+ * set all corresponding values of b_open to fdDir
+ * create error condition
+ * return 0
  *****************************************************************************/
-fdDir *fs_opendir(const char *name)
-{
+fdDir *fs_opendir(const char *name) {
     int fd;
     struct dirent *openDir;
-    // call b_open
+
     fd = b_open(name,O_RDWR);
     // set all corresponding values of b_open to fdDir
 
@@ -131,10 +137,12 @@ fdDir *fs_opendir(const char *name)
     }
 
     fdDir dir; 
- /*************************************************/
- // UPDATE TO HAVE NEW LOGIC FOR FINDING DIR ENTRY
- /****************************************************/
-/*
+    return 0;
+}
+/*************************************************
+* UPDATE TO HAVE NEW LOGIC FOR FINDING DIR ENTRY
+****************************************************/
+/******************************************************************************
     for(int i = 0; i < entriesLength; i++) {
         if(strcmp(entries[i].path,name) == 0) {
             printf("Opening %s directory... \n", name);
@@ -148,21 +156,20 @@ fdDir *fs_opendir(const char *name)
         } else {
             printf("No such %s directory found.\n", name);
         }
-    */
-    //}    // (length,LBA of directory direntry position, starting LBA of directory, name? )
-    return 0;
-}
+    }    (length,LBA of directory direntry position, starting LBA of directory, name? )
+******************************************************************************/
+
 /******************************************************************************
  *                      -----read a directory-----
  * This function returns the next directory entry of the current directory entry.
  * 
  *****************************************************************************/
-int readdirIndex = 0; /** Keeps track of children count */
+int childReadIndex = 0; /** Keeps track of children count */
 struct fs_diriteminfo directoryEntry;
-struct fs_diriteminfo *fs_readdir(fdDir *dirp)
-{
-    if(readdirIndex == dirp->childrenAmount){
-        readdirIndex = 0;
+
+struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
+    if(childReadIndex == dirp->childrenAmount){
+        childReadIndex = 0;
         printf("Could not read.\n");
         return NULL;
     }
@@ -170,117 +177,100 @@ struct fs_diriteminfo *fs_readdir(fdDir *dirp)
     /** Should fill out diriteminfo */
 
     /** Increment child index */
-    readdirIndex++;
+    childReadIndex++;
 
     return &directoryEntry;
 }
 
 /******************************************************************************
  *                      -----close a directory-----
- * 
+ * This function closes a directory, it simply prints out a prompt so the 
+ * user knows the directory is being closed, then returns 0
  *****************************************************************************/
-int fs_closedir(fdDir *dirp)
-{
+int fs_closedir(fdDir *dirp) {
     printf("Closing directory...\n");
     return 0;
 }
 
 /******************************************************************************
- *  b_close();   -----check if it is a file or not-----
- * First, we created a variable for the length of our array in order to
- * traverse using a for loop. Next, inside the For loop there will need to be
- * a string comparison for the path. Outside the for loop, we have to make sure
- * the types line up from the entries, to do this we compare with a char D
- * which refers to the fact that it is a file. Returning 1 if it is, or 0
- * if it is not a file.
+ *                -----check if it is a file or not-----
+ * create a pointer to the entry
+ * create a variable parsedpath which parses the path
+ * create a variable path length which stores the length of the path
+ * call getEntryFromPath and store in entry_p
+ * string comparison of the type in struct and "F"
+ * return 1 if it is true, 0 if not
+ * 
+ *                          ----OLD----
+ * int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
+ * entryStruct *entry_p;
+ * // look for path in entries
+ * for (int i = 0; i < entriesLength; i++) {
+ *  if (strcmp(entries[i].path, path)) {
+ *      entry_p = entries[i];
+ *      }
+ *  }
  *****************************************************************************/
-        int fs_isFile(char *path)
-        {
+int fs_isFile(char *path) {
     
-            /*
-            int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
-            entryStruct *entry_p;
-            // look for path in entries
-            for (int i = 0; i < entriesLength; i++)
-            {
-                if (strcmp(entries[i].path, path))
-                {
-                    entry_p = entries[i];
-                }
-            }*/
+    entryStruct *entry_p;
+    char *parsedPath = parsePath(path);
+    int pathLength = getArrLength(parsedPath);
+    entry_p = getEntryFromPath(parsedPath, pathLength);
 
-            entryStruct *entry_p;
-
-            // parse path
-            char *parsedPath = parsePath(path);
-
-            // get length of parsed path (used for next function)
-            int pathLength = getArrLength(parsedPath);
-
-            // get entry using functions
-            entry_p = getEntryFromPath(parsedPath,pathLength);
-
-    // case insensitive string compare, see if file. return 1 if file
-    if(strcasecmp(entry_p->type, "f")){
-                return 1;
+    if(strcasecmp(entry_p->type, "F")){
+        return 1;
+    } else{
+        return 0;
     }
-
-    else{
-                return 0;
-    }
-        }
+}
 
 /******************************************************************************
  *                 -----check if it is a directory or not-----                  
- * First, we created a variable for the length of our array in order to
- * traverse using a for loop. Next, inside the For loop there will need to be
- * a string comparison for the path. Outside the for loop, we have to make sure
- * the types line up from the entries, to do this we compare with a char D
- * which refers to the fact that it is a directory. Returning 1 if it is, or 0
- * if it is not a directory.
+ * create a pointer to the entry
+ * create a variable parsedpath which parses the path
+ * create a variable path length which stores the length of the path
+ * call getEntryFromPath and store in entry_p
+ * string comparison of the type in struct and "D"
+ * return 1 if it is true, 0 if not
+ * 
+ *                              ----OLD----
+ * int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
+ * entryStruct * entry_p;
+ * 
+ * for (int i = 0; i < entriesLength; i++) {
+ *      if (strcmp(entries[i].path, path)) {
+ *          entry_p = entries[i];
+ *      }
+ *  }
  *****************************************************************************/
-    int fs_isDir(char *path) {
-        /*
-        int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
-        entryStruct *entry_p;
-        // look for path in entries
-        for (int i = 0; i < entriesLength; i++)
-        {
-            if (strcmp(entries[i].path, path))
-            {
-                entry_p = entries[i];
-            }
-        }*/
+int fs_isDir(char *path) {
 
-        entryStruct *entry_p;
+    entryStruct *entry_p;
+    char *parsedPath = parsePath(path);
+    int pathLength = getArrLength(parsedPath);
+    entry_p = getEntryFromPath(parsedPath, pathLength);
 
-        // parse path
-        char *parsedPath = parsePath(path);
-
-        // get length of parsed path (used for next function)
-        int pathLength = getArrLength(parsedPath);
-
-        // get entry using functions
-        entry_p = getEntryFromPath(parsedPath,pathLength);
-
-        if(strcmp(entry_p->type, "D")){
-            return 1;
-        } else{
-            return 0;
-        }
+    if(strcmp(entry_p->type, "D")){
+        return 1;
+    } else{
+        return 0;
     }
+}
 
 /******************************************************************************
+ *                      -----file system stat-----
+ * sets all the values for the fs_stat struct
+ * check the entries for the path declaring the variable
+ * call stat() to display the file or file system status and set all values
+ * returns 0 if the function call was sucessful.
  * 
- * 
+ * source: https://pubs.opengroup.org/onlinepubs/009696799/functions/stat.html
  *****************************************************************************/
-int fs_stat(const char *path, struct fs_stat *buf)
-{
+int fs_stat(const char *path, struct fs_stat *buf) {
     // check entries for path , declare that variable
     struct stat * pstat; 
     pstat = (struct stat *) buf;
-    // use this to set all values of fs_stat struct
-    /** stat() displays file or file system status; returns 0 if successful. */
-    /** See: https://pubs.opengroup.org/onlinepubs/009696799/functions/stat.html */
+
     return (stat(path, pstat));
 }
