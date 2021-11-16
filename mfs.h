@@ -44,6 +44,7 @@ typedef u_int32_t uint32_t;
 
 char * parsePath(char *path);
 int getArrLength(char *arr);
+char * getParentPath(char *path);
 entryStruct *getEntryFromPath(char *arr, int arrLength);
 
 // **************************************************** //

@@ -40,16 +40,16 @@ int findFreeBlocks(int blocksNeeded) {
 	int freeStart = 0;
 	// this will keep track of if there are enough free blocks at that location
 	int freeBlocks = 0;
-
 	// loop through free map
 	for(int i=0; i<freeMapSize; i++){
 		// if we found a free space, start inner loop
-		if(freeMap[i]=0){
+		if(freeMap[i]==0){
+			freeStart = i;
 			// inner loop will begin. This will keep track of how many free spaces we have
 			// IN A ROW.
 			for(int j=freeStart+1; j<freeMapSize; j++){
 				// break inner for loop either when we found a used space
-				// or we found enough freeBlocks. 
+				// or we found enough freeBlocks.
 				if(freeMap[j]==1||blocksNeeded==freeBlocks){
 					break;
 				}
@@ -57,7 +57,7 @@ int findFreeBlocks(int blocksNeeded) {
 			}
 		}
 		// if enough freeBlocks are found at this freeStart location, break loop
-		if(freeBlocks=blocksNeeded){
+		if(freeBlocks==blocksNeeded){
 			break;
 		}
 		// reinitialize freeBlocks for next inner loop.
@@ -95,7 +95,11 @@ int initRootDir(uint64_t blockSize)
 	// find free space
 	int freeBlock = findFreeBlocks(blocksNeeded); // parameter is amount of blocks needed for root
 
-	
+    for (int i = freeBlock; i < freeBlock + blocksNeeded; i++)
+    {
+		// mark free map used 
+        freeMap[i] = 1;
+    }
 
     // "." directory, or first entry, is just a pointer to the current directory.
 	strcpy(entry_p[0].name,".");
@@ -106,7 +110,7 @@ int initRootDir(uint64_t blockSize)
 	entry_p[0].size = entrySize;
 	entry_p[0].type = 'd'; // directory
 	// path of root directory
-	entry_p[0].path="/";
+	//entry_p[0].path="/";
 
 	// second entry is the same as first because root does not have a parent 
 	// except the name is ".."
@@ -115,7 +119,7 @@ int initRootDir(uint64_t blockSize)
 	entry_p[1].blockCount = blocksNeeded;
 	entry_p[1].size = entrySize;
 	entry_p[1].type = 'd';
-	entry_p[1].path="/";
+	//entry_p[1].path="/";
 
 	// other directories will be initialized when made.
 	// when you make a directory, you will update block location and other
