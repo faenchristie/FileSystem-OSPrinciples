@@ -27,7 +27,6 @@
 #include "fsDirectory.h"
 #include "b_io.h"
 
-
 /******************************************************************************
  *                        -----parses file path-----
  * parsing the file path with the token "/" to denote when the path begins and
@@ -53,7 +52,6 @@
  * a while loop will trigger until null is found
  * finally it will return the count, int length
  *****************************************************************************/
-
 int getArrLength(char *arr) {
 
     int count = 0;
@@ -70,8 +68,7 @@ int getArrLength(char *arr) {
  * Reads through parsed path one name at a time. Starts by opening root directory. 
  * Returns a pointer to an array of entries.
  *****************************************************************************/
-
-entryStruct * getEntryFromPath(char *arr, int arrLength){
+entryStruct * getEntryFromPath(char *arr, int arrLength) {
 
     entryStruct *entry_p;
     entryStruct *tempEntry;
