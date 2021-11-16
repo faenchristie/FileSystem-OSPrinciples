@@ -21,8 +21,7 @@
 #include "b_io.h"
 
 #include <dirent.h>
-
-#include "fsInit.c"
+#include "fsInit.h"
 
 #define FT_REGFILE DT_REG
 #define FT_DIRECTORY DT_DIR
