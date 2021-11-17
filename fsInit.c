@@ -22,8 +22,6 @@
 #include <string.h>
 
 #include "fsInit.h"
-#include "fsFree.h"
-#include "fsRoot.h"
 
 /**************************************************************************
 * --------------------Initializing the file system-------------------------
@@ -58,8 +56,8 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize) {
 		printf("Signature Matched\n");
 		int fsBlockCount = (((numberOfBlocks + 7) / 8) + (blockSize - 1)) / blockSize;
 		printf("fsBlockCount is %d\n", fsBlockCount);
-		unsigned char *fsMap = malloc(fsBlockCount * blockSize);
-		LBAread(fsMap, fsBlockCount, vcb_p->freeSpaceMap);
+		freeMap = malloc(fsBlockCount * blockSize);
+		LBAread(freeMap, fsBlockCount, vcb_p->freeSpaceMap);
 	}
 	return 0;
 }

@@ -43,9 +43,12 @@ typedef u_int32_t uint32_t;
 
 // ************ TEAM ADDED FUNCTIONS ****************** //
 
-char * parsePath(char *path);
-int getArrLength(char *arr);
-char * getParentPath(char *path);
+entryStruct *currentEntry;
+char *parsedPath[500];
+char *parentPath[500];
+void parsePath(char *path);
+int getArrLength(char *arr[]);
+void getParentPath();
 entryStruct *getEntryFromPath(char *arr, int arrLength);
 
 // **************************************************** //

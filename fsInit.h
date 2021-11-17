@@ -6,6 +6,8 @@
 
 #include "fsLow.h"
 #include "fsEntry.h"
+#include "fsFree.h"
+#include "fsRoot.h"
 
 #define MAGICNUMBER 3141592654
 

@@ -12,6 +12,8 @@
 * space for the file system.
 **************************************************************/
 
+int freeBlockStart;
+
 int findFreeBlocks(int blocksNeeded);
 
 int initFreeSpace(uint64_t numberOfBlocks, uint64_t blockSize);
