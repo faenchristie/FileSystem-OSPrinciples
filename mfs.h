@@ -19,9 +19,10 @@
 #include <time.h>
 
 #include "b_io.h"
+#include "fsInit.h"
 
 #include <dirent.h>
-#include "fsInit.h"
+
 
 #define FT_REGFILE DT_REG
 #define FT_DIRECTORY DT_DIR

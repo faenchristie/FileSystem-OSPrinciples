@@ -6,12 +6,10 @@
 * Group Name: Arrays of Dread
 * Project: Basic File System
 *
-* File: fsFree.h
+* File: fsDirectory.h
 *
-* Description: function definitions for initializing the free
-* space for the file system.
+* Description: holds the directory functions like initialize
+* root directory, will use in conjunction with mfs.h later on.
 **************************************************************/
 
-int findFreeBlocks(int blocksNeeded);
-
-int initFreeSpace(uint64_t numberOfBlocks, uint64_t blockSize);
+int initRootDir();
