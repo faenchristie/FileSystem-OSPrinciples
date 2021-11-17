@@ -65,8 +65,7 @@ b_io_fd b_getFCB()
 // Interface to open a buffered file
 // Modification of interface for this assignment, flags match the Linux flags for open
 // O_RDONLY, O_WRONLY, or O_RDWR
-b_io_fd b_open(char *filename, int flags)
-{
+b_io_fd b_open(char *filename, int flags) {
 	b_io_fd returnFd;
 
 	//*** TODO ***:  Modify to save or set any information needed
@@ -83,14 +82,12 @@ b_io_fd b_open(char *filename, int flags)
 }
 
 // Interface to seek function
-int b_seek(b_io_fd fd, off_t offset, int whence)
-{
+int b_seek(b_io_fd fd, off_t offset, int whence) {
 	if (startup == 0)
 		b_init(); //Initialize our system
 
 	// check that fd is between 0 and (MAXFCBS-1)
-	if ((fd < 0) || (fd >= MAXFCBS))
-	{
+	if ((fd < 0) || (fd >= MAXFCBS)) {
 		return (-1); //invalid file descriptor
 	}
 
@@ -98,8 +95,7 @@ int b_seek(b_io_fd fd, off_t offset, int whence)
 }
 
 // Interface to write function
-int b_write(b_io_fd fd, char *buffer, int count)
-{
+int b_write(b_io_fd fd, char *buffer, int count) {
 	if (startup == 0)
 		b_init(); //Initialize our system
 
@@ -165,7 +161,7 @@ int b_read(b_io_fd fd, char *buffer, int count)
 		part3 = part3 - part2; // Leftover bytes from part2 that didn't fit the 512 byte chunk size
 	}
 
-	if (part1 > 0) // memcpy to buffer with the part1 size, and then increment index with part1's size
+	if (part1 > 0) // memcpy to buffer with the part1 size, and then increment index with part1's size 
 	{
 		memcpy(buffer, fcbArray[fd].buf + fcbArray[fd].index, part1);
 		fcbArray[fd].index = fcbArray[fd].index + part1;
@@ -199,6 +195,6 @@ int b_read(b_io_fd fd, char *buffer, int count)
 }
 
 // Interface to Close the file
-void b_close(b_io_fd fd)
-{
+void b_close(b_io_fd fd) {
+	
 }

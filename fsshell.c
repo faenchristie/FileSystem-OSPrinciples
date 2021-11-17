@@ -81,6 +81,7 @@ static int dispatchcount = sizeof(dispatchTable) / sizeof(dispatch_t);
 int displayFiles(fdDir *dirp, int flall, int fllong)
 {
 #if (CMDLS_ON == 1)
+	printf("error");
 	if (dirp == NULL) //get out if error
 		return (-1);
 

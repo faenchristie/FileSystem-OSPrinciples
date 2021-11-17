@@ -22,9 +22,8 @@
 
 #include "fsLow.h"
 #include "mfs.h"
-//#include "fsEntry.h"
-#include "fsInit.c"
-#include "fsDirectory.h"
+#include "fsInit.h"
+#include "fsRoot.h"
 #include "b_io.h"
 
 /******************************************************************************
@@ -125,55 +124,50 @@ fdDir *fs_opendir(const char *name) {
     int fd;
     struct dirent *openDir;
 
-    fd = b_open(name,O_RDWR);
-    // set all corresponding values of b_open to fdDir
+    fd = b_open(name, O_RDWR);
 
-    if(fd < 0){
+    if(fd < 0) {
         printf("Could not open %s directory.\n", name);
         return NULL;
     }
 
-    fdDir dir; 
-    return 0;
+    return fd;
 }
-/*************************************************
-* UPDATE TO HAVE NEW LOGIC FOR FINDING DIR ENTRY
-****************************************************/
-/******************************************************************************
-    for(int i = 0; i < entriesLength; i++) {
-        if(strcmp(entries[i].path,name) == 0) {
-            printf("Opening %s directory... \n", name);
-            while( (openDir = fs_readdir(dir) != NULL){
-                dir->name = name;
-                // // find rec length 
-                // // find entry position in directory
-                // // find         }
-
-            }
-        } else {
-            printf("No such %s directory found.\n", name);
-        }
-    }    (length,LBA of directory direntry position, starting LBA of directory, name? )
-******************************************************************************/
 
 /******************************************************************************
  *                      -----read a directory-----
  * This function returns the next directory entry of the current directory entry.
  * 
+ * created to variables, an index and a directoryEntry from struct
+ * an if statement to return NULL if the child cannot be read
+ * next need to get the file path of the child and store that in a variable
+ * then, set the properties of the entry
+ * increment the counter to read the next child in the list.
+ * return the directory entry
  *****************************************************************************/
 int childReadIndex = 0; /** Keeps track of children count */
 struct fs_diriteminfo directoryEntry;
+fdDir* childList;
 
 struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
+
     if(childReadIndex == dirp->childrenAmount){
         childReadIndex = 0;
         printf("Could not read.\n");
         return NULL;
     }
 
-    /** Should fill out diriteminfo */
+    //need to get the child path
+    for (int i = 0; i < DIRENTRIES; i++) {
+        if (childList[childReadIndex].directoryChildren[i] != 0) {
+            int fd = childList[childReadIndex].directoryChildren[i];
+            printf("%s\n", childList[fd].name);
+        }
+    }
 
-    /** Increment child index */
+    directoryEntry.d_name = child->id;
+    strcpy(directoryEntry.d_name, child->name);
+
     childReadIndex++;
 
     return &directoryEntry;
