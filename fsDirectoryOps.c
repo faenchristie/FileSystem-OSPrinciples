@@ -131,6 +131,7 @@ fdDir *fs_opendir(const char *name) {
         return NULL;
     }
 
+    /** Return file descriptor */
     return fd;
 }
 
@@ -243,7 +244,8 @@ int fs_isDir(char *path) {
     entry_p = getEntryFromPath(parsedPath, pathLength);
 
     if(strcmp(entry_p->type, "D")){
-        return 1;
+        // 1 means it is a directory?
+        return 1; 
     } else{
         return 0;
     }
@@ -259,9 +261,33 @@ int fs_isDir(char *path) {
  * source: https://pubs.opengroup.org/onlinepubs/009696799/functions/stat.html
  *****************************************************************************/
 int fs_stat(const char *path, struct fs_stat *buf) {
-    // check entries for path , declare that variable
-    struct stat * pstat; 
-    pstat = (struct stat *) buf;
+    // find entry that matches path
+    entryStruct * entry_p;
+    char *parsedPath = parsedPath(path);
+    int pathLength = getArrLength(parsedPath);
+    entry_p = getEntryFromPath(parsedPath, pathLength);
+    
+    // Check if entry is a directory
+    if(fs_isDir(parsedPath) != 1){
+        printf("%s is not a directory.\n", path);
+        return -1;
+    }
 
-    return (stat(path, pstat));
+    // Add more information in entry struct so we can populate buf?
+    // print out entry's information
+    printf("Total Size: %d\n", (buf->st_size = entry_p->size));
+    printf("Number of blocks: %d\n", (buf->st_blocks = entry_p->blockCount));
+    printf("Blocksize: %d\n", (buf->st_blksize = vcb_p->blockSize));
+    printf("Created: %d\n");
+    printf("Access time: %d\n");
+    printf("Last modification: %d"\n);
+
+    // off_t st_size;		  /* total size, in bytes */
+	// blksize_t st_blksize; /* blocksize for file system I/O */
+	// blkcnt_t st_blocks;	  /* number of 512B blocks allocated */
+	// time_t st_accesstime; /* time of last access */
+	// time_t st_modtime;	  /* time of last modification */
+	// time_t st_createtime; /* time of last status change */
+
+    // return 0 if successful.
 }

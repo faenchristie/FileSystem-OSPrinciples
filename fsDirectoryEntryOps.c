@@ -229,7 +229,8 @@ int fs_setcwd(char *buf)
 {
     /// ***************** WORK ON THIS ******************///
     // parse file path
-
+    char *parsedPath = parsePath(buf);
+    
     // search for directory based on path
     // boolean
     int found = 0;
@@ -265,7 +266,7 @@ int fs_setcwd(char *buf)
     // currentDirectoryPath = NULL;
 
     // set new CWD
-    strcpy(currentDirectoryPath, buf);
+    printf("Setting cwd to %s.\n", strcpy(currentDirectoryPath, buf));
 
     return 1;
 }
