@@ -49,7 +49,7 @@ char *parentPath[500];
 void parsePath(char *path);
 int getArrLength(char *arr[]);
 void getParentPath();
-entryStruct *getEntryFromPath(char *arr, int arrLength);
+void getEntryFromPath(char *arr[], int arrLength);
 
 // **************************************************** //
 

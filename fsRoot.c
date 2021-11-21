@@ -52,12 +52,14 @@ int initRootDir(uint64_t blockSize)
 
 	// find free space
 	int freeBlock = findFreeBlocks(blocksNeeded); // parameter is amount of blocks needed for root
-
+	printf("Root start block: %i\n",freeBlock);
+	printf("Root blocksNeeded: %i\n",blocksNeeded);
     for (int i = freeBlock; i < freeBlock + blocksNeeded; i++)
     {
 		// mark free map used 
         freeMap[i] = 1;
     }
+	printf("Next free block after root: %i\n",findFreeBlocks(blocksNeeded));
 
     // "." directory, or first entry, is just a pointer to the current directory.
 	strcpy(entry_p[0].name,".");
@@ -66,7 +68,7 @@ int initRootDir(uint64_t blockSize)
 	// amount of blocks root takes up 
 	entry_p[0].blockCount = blocksNeeded; 
 	entry_p[0].size = entrySize;
-	entry_p[0].type = 'd'; // directory
+	entry_p[0].type[0]="d"; // directory
 	// path of root directory
 	//entry_p[0].path="/";
 
@@ -76,7 +78,7 @@ int initRootDir(uint64_t blockSize)
     entry_p[1].blockLocation = freeBlock;
 	entry_p[1].blockCount = blocksNeeded;
 	entry_p[1].size = entrySize;
-	entry_p[1].type = 'd';
+	entry_p[1].type[0]="d";
 	//entry_p[1].path="/";
 
 	// other directories will be initialized when made.
@@ -84,10 +86,10 @@ int initRootDir(uint64_t blockSize)
 	// necessary information, and marked them as used.
 	
 	
-	for(int i=2; i< DIRENTRIES-2; i++){
+	for(int i=2; i<DIRENTRIES; i++){
 		// marked as undefined. We can use this to see what entries
 		// are being used inside our directory.
-		entry_p[i].type = 'u';
+		entry_p[i].type[0]="u";
 	}
 
 	//writing root directory, "blocksNeeded" blocks starting at the free space returned to us by map

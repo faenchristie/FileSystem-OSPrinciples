@@ -21,7 +21,7 @@ typedef struct
 {
     int blockLocation;
     char name[50];
-    char type; // D = directory, F = file
+    char type[50]; // D = directory, F = file
     int size;
     // added :
     int blockCount; // counts number of logical blocks used

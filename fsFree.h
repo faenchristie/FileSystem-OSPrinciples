@@ -12,7 +12,6 @@
 * space for the file system.
 **************************************************************/
 
-int freeBlockStart;
 
 int findFreeBlocks(int blocksNeeded);
 
