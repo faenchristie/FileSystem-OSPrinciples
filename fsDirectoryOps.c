@@ -17,8 +17,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
-#include <dirent.h> // the format of directory entries
-#include <sys/stat.h> // Utilizing the stat() function
+
 
 #include "fsLow.h"
 #include "mfs.h"
@@ -181,6 +180,7 @@ struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
  *****************************************************************************/
 int fs_closedir(fdDir *dirp) {
     printf("Closing directory...\n");
+    free(dirp);
     return 0;
 }
 
@@ -210,7 +210,7 @@ int fs_isFile(char *path) {
     int pathLength = getArrLength(parsedPath);
     entry_p = getEntryFromPath(parsedPath, pathLength);
 
-    if(strcasecmp(entry_p->type, "F")){
+    if(entry_p->type = 2){
         return 1;
     } else{
         return 0;
@@ -243,7 +243,7 @@ int fs_isDir(char *path) {
     int pathLength = getArrLength(parsedPath);
     entry_p = getEntryFromPath(parsedPath, pathLength);
 
-    if(strcmp(entry_p->type, "D")){
+    if(entry_p->type = 1){
         // 1 means it is a directory?
         return 1; 
     } else{
@@ -264,30 +264,25 @@ int fs_stat(const char *path, struct fs_stat *buf) {
     // find entry that matches path
     entryStruct * entry_p;
     char *parsedPath = parsedPath(path);
-    int pathLength = getArrLength(parsedPath);
-    entry_p = getEntryFromPath(parsedPath, pathLength);
-    
-    // Check if entry is a directory
-    if(fs_isDir(parsedPath) != 1){
-        printf("%s is not a directory.\n", path);
+
+    // Check if entry is a directory or file
+    if(fs_isDir(path) != 1 || fs_isFile(path) != 1){
+        printf("%s is not a directory or file.\n", path);
         return -1;
     }
 
-    // Add more information in entry struct so we can populate buf?
+    int pathLength = getArrLength(parsedPath);
+    entry_p = getEntryFromPath(parsedPath, pathLength);
+    
     // print out entry's information
     printf("Total Size: %d\n", (buf->st_size = entry_p->size));
     printf("Number of blocks: %d\n", (buf->st_blocks = entry_p->blockCount));
     printf("Blocksize: %d\n", (buf->st_blksize = vcb_p->blockSize));
-    printf("Created: %d\n");
-    printf("Access time: %d\n");
-    printf("Last modification: %d"\n);
-
-    // off_t st_size;		  /* total size, in bytes */
-	// blksize_t st_blksize; /* blocksize for file system I/O */
-	// blkcnt_t st_blocks;	  /* number of 512B blocks allocated */
-	// time_t st_accesstime; /* time of last access */
-	// time_t st_modtime;	  /* time of last modification */
-	// time_t st_createtime; /* time of last status change */
+    printf("Created: %d\n", (buf->st_createtime = entry_p->st_createtime));
+    printf("Access time: %d\n", (buf->st_accesstime = entry_p->st_accesstime));
+    printf("Last modification: %d\n", (buf->st_modtime = entry_p->st_modtime));
 
     // return 0 if successful.
+    free(entry_p);
+    return 0;
 }

@@ -26,6 +26,9 @@
 //#include "fsEntry.h"
 
 char currentDirectoryPath[200];
+// [directory depth][filename size]
+char currentDirectoryPathArr[DEFAULTSIZE][256]; 
+int currentDirectoryPathArrSize = 0;
 
 /******************************************************************************
  * -----removes a file-----
@@ -227,46 +230,32 @@ char *fs_getcwd(char *buf, size_t size)
  *****************************************************************************/
 int fs_setcwd(char *buf)
 {
-    /// ***************** WORK ON THIS ******************///
-    // parse file path
+    // parse requested file path
     char *parsedPath = parsePath(buf);
-    
-    // search for directory based on path
-    // boolean
-    int found = 0;
 
-    //*****************************************************************//
-    // CHANGE TO USE NEW FIND DIR FUNC
-    //******************************************************************//
-
-    /*
-    for (int i = 0; i < numberOfEntries; i++)
-    {
-        // temp solution to avoid checking null value and getting seg fault
-        if (listofEntries != '\0')
-        {
-            if (strcmp(listOfEntries[i].path, buf))
-            {
-                found = 1;
-            }
-        }
-    }*/
-
-    // DIRECTORY NOT FOUND
-    if (!found)
-    {
-        printf("DIRECTORY NOT FOUND\n");
-        return 0;
+    // Check validity of path
+    if(fs_isDir(buf) != 1){
+        printf("%s is not a valid directory.\n", buf);
+        return -1;
     }
 
-    // clear old path
-    /**********************************************/
-    // FIND PROPER WAY TO CLEAR
-    /*********************************************/
-    // currentDirectoryPath = NULL;
+    // search for directory based on path
+    entryStruct *entry_p;
+    int pathLength = getArrLength(parsedPath);
+    entry_p = getEntryFromPath(parsedPath, pathLength);
 
-    // set new CWD
-    printf("Setting cwd to %s.\n", strcpy(currentDirectoryPath, buf));
+    // clear old path
+    currentDirectoryPath[0] = '\0';
+    currentDirectoryPathArraySize = 0;
+
+    // set new CWD by copying parsed path to CurrDirPathArr
+    for(int i = 0; i < getArrLength(buf); i++){
+        strcpy(currentDirectoryPathArr[i], buf[i]);
+        sprintf(currentDirectoryPath, "%s%s", currentDirectoryPath, buf[i]);
+        currentDirectoryPathArrSize++
+    }
+
+    printf("Setting cwd to %s.\n", currentDirectoryPath);
 
     return 1;
 }
