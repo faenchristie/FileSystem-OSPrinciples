@@ -174,6 +174,9 @@ void getEntryFromPath(char *arr[], int arrLength){
     free(tempEntry);
 }
 
+
+
+
 /******************************************************************************
  *                   -----opens a directory-----
  * 
@@ -552,46 +555,55 @@ int fs_rmdir(const char *pathname)
     // bool to check if path exists
     int found = 0;
 
-    // parse file path
-    //char *parsedPath = parsePath(pathname);
+    // parse file path to global variable parsedPath
+    parsePath(pathname);
 
     // get length of array (used for getentry function)
-    //int pathLength = getArrLength(parsedPath);
+    int pathLength = getArrLength(parsedPath);
 
-    entryStruct *entry_p; //= getEntryFromPath(parsedPath, pathLength);
-
-    if(entry_p!=NULL){
+    // get entry save in global variable currentEntry
+    getEntryFromPath(parsedPath,pathLength);
+    
+    if(currentEntry)!=NULL){
         found = 1;
     }
-
-
-
-    /************************************************************************/
-    // CHANGE TO USE NEW FIND DIR FUNC
-    /*************************************************************************/
-/*
-    // find directory of the pathname in our list of entries
-    for (int i = 0; i < numberOfEntries; i++)
-    {
-        // temp solution to avoid checking null value and getting seg fault
-        if (listofEntries[i] != '\0')
-        {
-            if (strcmp(pathname, listOfEntries[i].path))
-            {
-                blockNo = listOfEntries[i].blockLocation;
-                totalBlocks = listOfEntries[i].blockCount;
-                entryNo = i;
-                // set found to true
-                found = 1;
-            }
-        }
-    }*/
 
     // if directory is not found, print error, return
     if (!found)
     {
         printf("DIRECTORY DOES NOT EXIST\n");
-        return 0;
+        return -1;
+    }
+
+    // check if directory has children or not
+    // if dir has children, return error
+    if(currentEntry[0].childrenAmount!=0){
+        printf("CANNOT DELETE DIRECTORY WITH ENTRIES");
+        return -1;
+    }
+
+    // variables needed to find parent entry
+    entryStruct *parentEntry;
+    int entrySize = sizeof(entryStruct) * DIRENTRIES;
+    parentEntry = malloc(entrySize);
+    int parentLocation = currentEntry[0].parent;
+    int parentCount = currentEntry[0].parentCount;
+
+    // read parent into memory using variables stored in dir
+    LBAread(parentEntry,parentCount,parentLocation);
+
+    // find child in parent entry to remove from its list
+    for(int i=0; i<DIRENTRIES, i++){
+        // if name matches, entry found
+        if(strcmp(parentEntry[i].name,parsedPath[pathLength-1])==0){
+            parentEntry[i].name[0] = '\0';
+            parentEntry[i].blockLocation = NULL;
+            parentEntry[i].blockCount = NULL;
+            parentEntry[i].type = 0;
+            parententry[i].parent = NULL;
+            parententry[i].parentCount = NULL;
+            parententry[i].childrenAmount= NULL;
+        }
     }
 
     // print if deleted
@@ -602,6 +614,10 @@ int fs_rmdir(const char *pathname)
     {
         freeMap[i] = 0;
     }
+
+    // free malloc'd space
+    free(parentEntry);
+    free(currentEntry);
 
     return 0;
 }
