@@ -194,7 +194,7 @@ fdDir *fs_opendir(const char *name)
     fdDir *dir; 
 
     // malloc space for dir 
-    dir = malloc(sizeof(fdDur));
+    dir = malloc(sizeof(fdDir));
 
     // parse path to global variable parsePath
     parsePath(name);
@@ -202,10 +202,12 @@ fdDir *fs_opendir(const char *name)
     // 
     int pathLength = getArrLength(parsedPath);
 
+    //need arguments in here getEntryFromPath(char* arr[], int arrLength)
+    //***********this function call creates error 1 on make run*********8
     getEntryFromPath();
 
     // directory wasn't found, return
-    if(currentEntry=NULL){
+    if(currentEntry = NULL){
         printf("No such directory %s found.\n",name);
         return NULL;
     }
@@ -222,7 +224,7 @@ fdDir *fs_opendir(const char *name)
     // figure out how to assign this
     //dir->d_reclen = 
 
-  return dir;
+    return dir;
 }
 /******************************************************************************
  *                      -----read a directory-----
@@ -231,8 +233,9 @@ fdDir *fs_opendir(const char *name)
  *****************************************************************************/
 int readdirIndex = 0; /** Keeps track of children count */
 struct fs_diriteminfo directoryEntry;
-struct fs_diriteminfo *fs_readdir(fdDir *dirp)
-{
+
+struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
+
     if(readdirIndex == dirp->childrenAmount){
         readdirIndex = 0;
         printf("Could not read.\n");
@@ -257,7 +260,7 @@ int fs_closedir(fdDir *dirp)
     return 0;
 }
 
-       /******************************************************************************
+/******************************************************************************
  *  b_close();   -----check if it is a file or not-----
  * First, we created a variable for the length of our array in order to
  * traverse using a for loop. Next, inside the For loop there will need to be
@@ -290,7 +293,7 @@ int fs_closedir(fdDir *dirp)
     }
         }
 
-   /******************************************************************************
+/******************************************************************************
  *                 -----check if it is a directory or not-----                  
  * First, we created a variable for the length of our array in order to
  * traverse using a for loop. Next, inside the For loop there will need to be

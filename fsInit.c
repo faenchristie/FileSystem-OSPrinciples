@@ -40,8 +40,8 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize) {
 	
 	LBAread(vcb_p, 1, 0);
 
-	if (vcb_p->signature != MAGICNUMBER)
-	{
+	if (vcb_p->signature != MAGICNUMBER) {
+
 		printf("Signature did NOT match\n");
 		vcb_p->blockSize;
 		vcb_p->blockCount;
@@ -50,9 +50,8 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize) {
 		vcb_p->rootDirBlocks = sizeof(entryStruct) * DIRENTRIES;
 		vcb_p->signature = MAGICNUMBER;
 		LBAwrite(vcb_p, 1, 0);
-	}
-	else
-	{
+	} else {
+
 		printf("Signature Matched\n");
 		int fsBlockCount = (((numberOfBlocks + 7) / 8) + (blockSize - 1)) / blockSize;
 		printf("fsBlockCount is %d\n", fsBlockCount);

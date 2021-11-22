@@ -21,7 +21,7 @@
 #include <fcntl.h>
 #include "fsLow.h"
 #include "b_io.h"
-#include "fsinit.h"
+#include "fsInit.h"
 
 #define MAXFCBS 20
 #define B_CHUNK_SIZE 512
@@ -35,12 +35,15 @@ typedef struct b_fcb
 } b_fcb;
 
 b_fcb fcbArray[MAXFCBS];
+uint64_t bufSize;
 
 int startup = 0; //Indicates that this has not been initialized
 
 //Method to initialize our file system
-void b_init()
-{
+void b_init() {
+
+	bufSize = vcb_p->blockSize;
+
 	//init fcbArray to all free
 	for (int i = 0; i < MAXFCBS; i++)
 	{
@@ -70,7 +73,7 @@ b_io_fd b_open(char *filename, int flags) {
 
 	b_io_fd fd; 
 	b_io_fd returnFd;
-	b_fcb * fcb; 
+	b_fcb * fcb;
 
 	//*** TODO ***:  Modify to save or set any information needed
 	//
@@ -90,7 +93,7 @@ b_io_fd b_open(char *filename, int flags) {
 	fcb = &fcbArray[returnFd];
 
 	//allocate the buffer to the size of our vcb
-	fcb->buf = malloc(vcbStruct->blockSize + 1);
+	fcb->buf = malloc(bufSize + 1);
 
 	//error check for if there is not enough space
 	if (fcb->buf == NULL) {
