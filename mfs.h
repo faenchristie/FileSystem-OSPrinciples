@@ -76,6 +76,8 @@ typedef struct
 	int childrenAmount;
 	// added: //
 	char name[256];
+	// amount of blocks directory uses
+	uint64_t directoryBlockAmount;
 } fdDir;
 
 // Key directory functions

@@ -191,27 +191,38 @@ fdDir *fs_opendir(const char *name)
         return NULL;
     }
 
-    fdDir dir; 
- /*************************************************/
- // UPDATE TO HAVE NEW LOGIC FOR FINDING DIR ENTRY
- /****************************************************/
-/*
-    for(int i = 0; i < entriesLength; i++) {
-        if(strcmp(entries[i].path,name) == 0) {
-            printf("Opening %s directory... \n", name);
-            while( (openDir = fs_readdir(dir) != NULL){
-                dir->name = name;
-                // // find rec length 
-                // // find entry position in directory
-                // // find         }
+    fdDir *dir; 
 
-            }
-        } else {
-            printf("No such %s directory found.\n", name);
-        }
-    */
-    //}    // (length,LBA of directory direntry position, starting LBA of directory, name? )
-    return 0;
+    // malloc space for dir 
+    dir = malloc(sizeof(fdDur));
+
+    // parse path to global variable parsePath
+    parsePath(name);
+
+    // 
+    int pathLength = getArrLength(parsedPath);
+
+    getEntryFromPath();
+
+    // directory wasn't found, return
+    if(currentEntry=NULL){
+        printf("No such directory %s found.\n",name);
+        return NULL;
+    }
+
+    // assign values
+    // should this be 2? index 2 would be the first child entry
+    // of the directory.
+    dir->dirEntryPosition = 2; 
+    // starting block of where directory is located
+    dir->directoryStartLocation = currentEntry[0].blockLocation;
+    dir->directoryBlockAmount = currentEntry[0].blockCount;
+    // add logic for counting children if possible
+    dir->childrenAmount = currentEntry[0].childrenAmount;
+    // figure out how to assign this
+    //dir->d_reclen = 
+
+  return dir;
 }
 /******************************************************************************
  *                      -----read a directory-----
@@ -257,32 +268,20 @@ int fs_closedir(fdDir *dirp)
  *****************************************************************************/
         int fs_isFile(char *path)
         {
-    
-            /*
-            int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
-            entryStruct *entry_p;
-            // look for path in entries
-            for (int i = 0; i < entriesLength; i++)
-            {
-                if (strcmp(entries[i].path, path))
-                {
-                    entry_p = entries[i];
-                }
-            }*/
-
-            entryStruct *entry_p;
-
             // parse path
-            //char *parsedPath = parsePath(path);
+            // returns to global variable parsedPath
+            parsePath(path);
 
             // get length of parsed path (used for next function)
-            //int pathLength = getArrLength(parsedPath);
+            int pathLength = getArrLength(parsedPath);
 
             // get entry using functions
-            //entry_p = getEntryFromPath(parsedPath,pathLength);
+            // returns to global vatiable currentEntry
+            getEntryFromPath(parsedPath,pathLength);
 
-    // case insensitive string compare, see if file. return 1 if file
-    if(strcasecmp(entry_p->type, "f")){
+            // index 0 of the entry is pointer to itself.
+            // check if that index has a value of "2" aka File
+    if(strcmp(currentEntry[0].type, "2")){
                 return 1;
     }
 
@@ -302,30 +301,20 @@ int fs_closedir(fdDir *dirp)
  *****************************************************************************/
         int fs_isDir(char *path)
         {
-            /*
-            int entriesLength = sizeof(listOfEntries) / sizeof(entryStruct);
-            entryStruct *entry_p;
-            // look for path in entries
-            for (int i = 0; i < entriesLength; i++)
-            {
-                if (strcmp(entries[i].path, path))
-                {
-                    entry_p = entries[i];
-                }
-            }*/
-
-            entryStruct *entry_p;
-
             // parse path
-            //char *parsedPath = parsePath(path);
+            // returns to global variable parsedPath
+            parsePath(path);
 
             // get length of parsed path (used for next function)
-            int pathLength; //= getArrLength(parsedPath);
+            int pathLength = getArrLength(parsedPath);
 
             // get entry using functions
-            //entry_p = getEntryFromPath(parsedPath,pathLength);
+            // returns to global vatiable currentEntry
+            getEntryFromPath(parsedPath,pathLength);
 
-    if(strcmp(entry_p->type, "D")){
+            // index 0 of the entry is pointer to itself.
+            // check if that index has a value of "1" aka Directory
+    if(strcmp(currentEntry[0].type, "1")){
                 return 1;
     }
 
@@ -459,7 +448,7 @@ int fs_mkdir(const char *pathname, mode_t mode)
     if (blockNo==0)
     {
         printf("ERROR: NOT ENOUGH MEMORY\n");
-        return 0;
+        return -1;
     }
 
     printf("ERROR 3\n");
@@ -484,32 +473,38 @@ int fs_mkdir(const char *pathname, mode_t mode)
     entry_p[0].blockLocation = blockNo;
     entry_p[0].blockCount = blocksNeeded;
     strcpy(entry_p[0].name, ".");
-    strcpy(entry_p[0].type,"d");
+    entry_p[0].type = 1;
 
     // next entry is pointer to parent
     entry_p[1].parent = currentEntry[0].parent;
     entry_p[1].blockLocation = currentEntry[0].blockLocation;
     entry_p[1].blockCount = currentEntry[0].blockCount;
     strcpy(entry_p[1].name,"..");
-    strcpy(entry_p[1].type,"d");
+    entry_p[1].type = 1;
 
     // initialize other values as undefined entry
     for(int i=2; i<DIRENTRIES-2; i++){
-        strcpy(entry_p[i].type,"u");
+        entry_p[i].type = 0;
     }
     printf("PARSED PATH: %s\n",parsedPath[pathLength-1]);
-
-        printf("currentEntry[0].type:%s\n",currentEntry[0].type[0]);
     for(int i=0; i<DIRENTRIES-1; i++){
-        printf("currentEntry[%i].type:%s\n",i,currentEntry[i].type[0]);
-        if(currentEntry[i].type=="u"){
+        printf("currentEntry[%i].type:%i\n",i,currentEntry[i].type);
+        if(currentEntry[i].type==0){
+            printf("current entry reached\n");
             // set current Entry [i] as our new entry
             currentEntry[i].blockLocation = blockNo;
             currentEntry[i].blockCount = blocksNeeded;
-            strcpy(currentEntry[i].type,"d");
+            currentEntry[i].type = 1;
+            printf("current entry error 1\n");
             // set name to the last item in the parsed pathh arr
-            strcpy(currentEntry[i].name,parsedPath[pathLength]);
+            printf("parsedPath[]: %s\n",parsedPath[pathLength-1]);
+            //strcpy(currentEntry[i].name,parsedPath[pathLength-1]);
+            //currentEntry[i].name[0] = parsedPath[pathLength-1];
+            printf("Current entry name: %s",currentEntry[i].name[0]);
+            printf("current entry error 2\n");
             // write current entry to memory with new values
+            printf("currenteEntry[0] block count: %i\n",currentEntry[0].blockCount);
+            printf("currenteEntry[0] block loc: %i\n",currentEntry[0].blockLocation);
             LBAwrite(currentEntry,currentEntry[0].blockCount,currentEntry[0].blockLocation);
             // break from loop
             break;

@@ -68,7 +68,7 @@ int initRootDir(uint64_t blockSize)
 	// amount of blocks root takes up 
 	entry_p[0].blockCount = blocksNeeded; 
 	entry_p[0].size = entrySize;
-	entry_p[0].type[0]="d"; // directory
+	entry_p[0].type=1; // directory
 	// path of root directory
 	//entry_p[0].path="/";
 
@@ -78,7 +78,7 @@ int initRootDir(uint64_t blockSize)
     entry_p[1].blockLocation = freeBlock;
 	entry_p[1].blockCount = blocksNeeded;
 	entry_p[1].size = entrySize;
-	entry_p[1].type[0]="d";
+	entry_p[1].type=1;
 	//entry_p[1].path="/";
 
 	// other directories will be initialized when made.
@@ -89,7 +89,8 @@ int initRootDir(uint64_t blockSize)
 	for(int i=2; i<DIRENTRIES; i++){
 		// marked as undefined. We can use this to see what entries
 		// are being used inside our directory.
-		entry_p[i].type[0]="u";
+		entry_p[i].type=0;
+		strcpy(entry_p[i].name,"entry");
 	}
 
 	//writing root directory, "blocksNeeded" blocks starting at the free space returned to us by map
