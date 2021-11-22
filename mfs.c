@@ -345,8 +345,6 @@ int fs_stat(const char *path, struct fs_stat *buf)
 }
 
 
-char currentDirectoryPath[200];
-
 /******************************************************************************
  * -----removes a file-----
  * 
@@ -356,52 +354,64 @@ int fs_delete(char *filename)
     int blocksUsed = 0;
     int blockStart = 0;
     // used to return error if file doesn't exist
-    int exists = 0;
     int entryNo = 0;
-    // search entry list for file
 
-    //*****************************************************************//
-    // CHANGE TO USE NEW DIRECTORY FINDING FUNC
-    //******************************************************************//
-    /*
-    for (int i = 0; i < numberOfEntries; i++)
-    {
-
-        // temp solution to avoid checking null value and getting seg fault
-        if (listofEntries[i] != '\0')
-        {
-            // checks if the path matches
-        if(strcmp(listOfEntries[i].path,filename)){
-                // set exist to true because we found the file
-                exists = 1;
-                entryNo = i;
-                // get info needed to delete entry from bitmap
-                blocksUsed = listOfEntries[i].blockCount;
-                blocksStart = listOfEntries[i].blockLocation;
-        }
-        }
-    }*/
+    // combine filename and working directory?
+    char *cwd; // = current working directory variable
+    strcat(cwd,"/");
+    strcat(cwd,filename);
+    
+    // use combined path to get entry
+    parsePath(cwd);
+    int pathLength = getArrLength(parsedPath);
+    getEntryFromPath(parsedPath,pathLength);
 
     // if file not found, print error, exit
-    if (!exists)
+    if (currentEntry==NULL)
     {
         printf("ERROR: FILE NOT FOUND\n");
         return 0;
     }
 
-    // if file found, loop through bitmap, marking bits as not used
-    if (exists)
+    // entry is valid
+    else
     {
+        // get parent entry of file 
+        entryStruct *parentEntry;
+        int entrySize = sizeof(entryStruct) * DIRENTRIES;
+        parentEntry = malloc(entrySize);
+        int parentLocation = currentEntry[0].parent;
+        int parentCount = currentEntry[0].parentCount;
+
+        // read parent into memory using variables stored in dir
+        LBAread(parentEntry,parentCount,parentLocation);
+
+        // find child in parent entry to remove from its list
+        for(int i=0; i<DIRENTRIES, i++){
+        // if name matches, entry found
+            if(strcmp(parentEntry[i].name,parsedPath[pathLength-1])==0){
+               parentEntry[i].name[0] = '\0';
+               parentEntry[i].blockLocation = NULL;
+               parentEntry[i].blockCount = NULL;
+               parentEntry[i].type = 0;
+               parententry[i].parent = NULL;
+               parententry[i].parentCount = NULL;
+               parententry[i].childrenAmount= NULL;
+
+            }
+        }
+
         for (int i = blockStart; i < blocksUsed + 1; i++)
         {
             freeMap[i] = 0;
         }
-        // nullify entry in list
-       // listOfEntries[entryNo] = "\0";
 
-        printf("FILE DELETED\n");
+       printf("FILE DELETED\n");
+       free(parentEntry);
+    
     }
 
+    free(currentEntry);
     return 0;
 }
 
