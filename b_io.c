@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include "fsLow.h"
 #include "b_io.h"
+#include "fsinit.h"
 
 #define MAXFCBS 20
 #define B_CHUNK_SIZE 512
@@ -66,17 +67,41 @@ b_io_fd b_getFCB()
 // Modification of interface for this assignment, flags match the Linux flags for open
 // O_RDONLY, O_WRONLY, or O_RDWR
 b_io_fd b_open(char *filename, int flags) {
+
+	b_io_fd fd; 
 	b_io_fd returnFd;
+	b_fcb * fcb; 
 
 	//*** TODO ***:  Modify to save or set any information needed
 	//
-	//
+	// possibly not complete yet
 
 	if (startup == 0)
 		b_init(); //Initialize our system
 
 	returnFd = b_getFCB(); // get our own file descriptor
 						   // check for error - all used FCB's
+
+	//error check for return fcb
+	if(returnFd < 0) {
+		return -1;
+	}
+
+	fcb = &fcbArray[returnFd];
+
+	//allocate the buffer to the size of our vcb
+	fcb->buf = malloc(vcbStruct->blockSize + 1);
+
+	//error check for if there is not enough space
+	if (fcb->buf == NULL) {
+		close(fd);
+		return -1;
+	}
+
+	fcb->buflen = 0;
+	fcb->index = 0;
+
+	printf("b_open: opening file '%s' with file descriptor %d\n", filename, fd);
 
 	return (returnFd); // all set
 }
@@ -100,8 +125,7 @@ int b_write(b_io_fd fd, char *buffer, int count) {
 		b_init(); //Initialize our system
 
 	// check that fd is between 0 and (MAXFCBS-1)
-	if ((fd < 0) || (fd >= MAXFCBS))
-	{
+	if ((fd < 0) || (fd >= MAXFCBS)) {
 		return (-1); //invalid file descriptor
 	}
 
@@ -127,11 +151,12 @@ int b_write(b_io_fd fd, char *buffer, int count) {
 //  |             |                                                |        |
 //  | Part1       |  Part 2                                        | Part3  |
 //  +-------------+------------------------------------------------+--------+
-int b_read(b_io_fd fd, char *buffer, int count)
-{
+int b_read(b_io_fd fd, char *buffer, int count) {
+
 	int bytesRead, bytesReturned; // for what we read and what we will return
 	int part1, part2, part3;
 	int blocksToCopy, leftoverBytes; // holds blocks needed to copy and how many bytes are left in buffer
+
 	if (startup == 0)
 		b_init(); //Initialize our system
 
@@ -147,9 +172,7 @@ int b_read(b_io_fd fd, char *buffer, int count)
 	{
 		part1 = count; // No need to set part 2 and 3 if there are enough bytes in buffer.
 		part2 = 0, part3 = 0;
-	}
-	else 
-	{
+	} else {
 		part1 = leftoverBytes; // First read
 
 		part3 = count - leftoverBytes; // part3 holds how many bytes that still need to be copied to buffer
@@ -166,26 +189,24 @@ int b_read(b_io_fd fd, char *buffer, int count)
 		memcpy(buffer, fcbArray[fd].buf + fcbArray[fd].index, part1);
 		fcbArray[fd].index = fcbArray[fd].index + part1;
 	}
-	if (part2 > 0)
-	{
+
+	if (part2 > 0){
 		// bytesRead = LBAread(buffer + part1, blocksToCopy, fcbArray[fd].currentBlk + fcbArray[fd].fi->location);
 		// fcbArray[fd].currentBlk += blocksToCopy;
 		part2 = bytesRead;
 	}
-	if (part3 > 0)
-	{
+
+	if (part3 > 0) {
 		// bytesRead = LBAread(fcbArray[fd].buf, 1, fcbArray[fd].currentBlk + fcbArray[fd].fi->location);
 		// fcbArray[fd].currentBlk += 1;
 		fcbArray[fd].index = 0;
 		fcbArray[fd].buflen = bytesRead;
 
-		if (bytesRead < part3) 
-		{
+		if (bytesRead < part3) {
 			part3 = bytesRead;
 		}
 
-		if (part3 > 0) 
-		{
+		if (part3 > 0) {
 			memcpy(buffer + part1 + part2, fcbArray[fd].buf + fcbArray[fd].index, part3);
 			fcbArray[fd].index = fcbArray[fd].index + part3;
 		}
