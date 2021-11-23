@@ -23,6 +23,8 @@
 
 #include "mfs.h"
 
+char currentDirectoryPath[200]; //from old fsDirectoryEntryOps.c
+
 /******************************************************************************
  *                        -----parses file path-----
  * parsing the file path with the token "/" to denote when the path begins and
@@ -66,7 +68,7 @@ int getArrLength(char *arr[])
     // tracks length
     int count = 0;
     // will go until null is found
-    while (arr[count]!=('\0'||NULL))
+    while (arr[count] != NULL) //removed (arr[count] != ('\0')||)
     {
         printf("GET ARR LENGTH FUNCTION 2\n");
         count++;
@@ -186,6 +188,11 @@ fdDir *fs_opendir(const char *name)
     int fd;
     struct dirent *openDir;
     // call b_open
+    /* 
+    * warning: passing argument 1 of ‘b_open’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+    * mfs.c:33:7: note: expected ‘char *’ but argument is of type ‘const char *’
+    * 
+    */
     fd = b_open(name,O_RDWR);
     // set all corresponding values of b_open to fdDir
 
@@ -272,29 +279,27 @@ int fs_closedir(fdDir *dirp)
  * which refers to the fact that it is a file. Returning 1 if it is, or 0
  * if it is not a file.
  *****************************************************************************/
-        int fs_isFile(char *path)
-        {
-            // parse path
-            // returns to global variable parsedPath
-            parsePath(path);
+int fs_isFile(char *path)
+{
+    // parse path
+    // returns to global variable parsedPath
+    parsePath(path);
 
-            // get length of parsed path (used for next function)
-            int pathLength = getArrLength(parsedPath);
+    // get length of parsed path (used for next function)
+    int pathLength = getArrLength(parsedPath);
 
-            // get entry using functions
-            // returns to global vatiable currentEntry
-            getEntryFromPath(parsedPath,pathLength);
+    // get entry using functions
+    // returns to global vatiable currentEntry
+    getEntryFromPath(parsedPath,pathLength);
 
-            // index 0 of the entry is pointer to itself.
-            // check if that index has a value of "2" aka File
-    if(strcmp(currentEntry[0].type, "2")){
-                return 1;
+    // index 0 of the entry is pointer to itself.
+    // check if that index has a value of "2" aka File
+    if(currentEntry[0].type == 2){
+        return 1;
+    }else{
+        return 0;
     }
-
-    else{
-                return 0;
-    }
-        }
+}
 
 /******************************************************************************
  *                 -----check if it is a directory or not-----                  
@@ -305,29 +310,27 @@ int fs_closedir(fdDir *dirp)
  * which refers to the fact that it is a directory. Returning 1 if it is, or 0
  * if it is not a directory.
  *****************************************************************************/
-        int fs_isDir(char *path)
-        {
-            // parse path
-            // returns to global variable parsedPath
-            parsePath(path);
+int fs_isDir(char *path)
+{
+    // parse path
+    // returns to global variable parsedPath
+    parsePath(path);
 
-            // get length of parsed path (used for next function)
-            int pathLength = getArrLength(parsedPath);
+    // get length of parsed path (used for next function)
+    int pathLength = getArrLength(parsedPath);
 
-            // get entry using functions
-            // returns to global vatiable currentEntry
-            getEntryFromPath(parsedPath,pathLength);
+    // get entry using functions
+    // returns to global vatiable currentEntry
+    getEntryFromPath(parsedPath,pathLength);
 
-            // index 0 of the entry is pointer to itself.
-            // check if that index has a value of "1" aka Directory
-    if(strcmp(currentEntry[0].type, "1")){
-                return 1;
+    // index 0 of the entry is pointer to itself.
+    // check if that index has a value of "1" aka Directory
+    if(currentEntry[0].type == 1){
+        return 1;
+    }else{
+        return 0;
     }
-
-    else{
-                return 0;
-    }
-        }
+}
 
 /******************************************************************************
  * 
@@ -387,16 +390,16 @@ int fs_delete(char *filename)
         LBAread(parentEntry,parentCount,parentLocation);
 
         // find child in parent entry to remove from its list
-        for(int i=0; i<DIRENTRIES, i++){
+        for(int i=0; i<DIRENTRIES; i++){
         // if name matches, entry found
             if(strcmp(parentEntry[i].name,parsedPath[pathLength-1])==0){
                parentEntry[i].name[0] = '\0';
-               parentEntry[i].blockLocation = NULL;
-               parentEntry[i].blockCount = NULL;
+               parentEntry[i].blockLocation = 0;
+               parentEntry[i].blockCount = 0;
                parentEntry[i].type = 0;
-               parententry[i].parent = NULL;
-               parententry[i].parentCount = NULL;
-               parententry[i].childrenAmount= NULL;
+               parentEntry[i].parent = 0;
+               parentEntry[i].parentCount = 0;
+               parentEntry[i].childrenAmount= 0;
 
             }
         }
@@ -516,7 +519,7 @@ int fs_mkdir(const char *pathname, mode_t mode)
             printf("parsedPath[]: %s\n",parsedPath[pathLength-1]);
             //strcpy(currentEntry[i].name,parsedPath[pathLength-1]);
             //currentEntry[i].name[0] = parsedPath[pathLength-1];
-            printf("Current entry name: %s",currentEntry[i].name[0]);
+            printf("Current entry name: %s",currentEntry[i].name);
             printf("current entry error 2\n");
             // write current entry to memory with new values
             printf("currenteEntry[0] block count: %i\n",currentEntry[0].blockCount);
@@ -574,7 +577,7 @@ int fs_rmdir(const char *pathname)
     // get entry save in global variable currentEntry
     getEntryFromPath(parsedPath,pathLength);
     
-    if(currentEntry)!=NULL){
+    if(currentEntry!=NULL){
         found = 1;
     }
 
@@ -603,16 +606,16 @@ int fs_rmdir(const char *pathname)
     LBAread(parentEntry,parentCount,parentLocation);
 
     // find child in parent entry to remove from its list
-    for(int i=0; i<DIRENTRIES, i++){
+    for(int i=0; i<DIRENTRIES; i++){
         // if name matches, entry found
         if(strcmp(parentEntry[i].name,parsedPath[pathLength-1])==0){
             parentEntry[i].name[0] = '\0';
-            parentEntry[i].blockLocation = NULL;
-            parentEntry[i].blockCount = NULL;
+            parentEntry[i].blockLocation = 0;
+            parentEntry[i].blockCount = 0;
             parentEntry[i].type = 0;
-            parententry[i].parent = NULL;
-            parententry[i].parentCount = NULL;
-            parententry[i].childrenAmount= NULL;
+            parentEntry[i].parent = 0;
+            parentEntry[i].parentCount = 0;
+            parentEntry[i].childrenAmount= 0;
         }
     }
 
@@ -638,7 +641,7 @@ int fs_rmdir(const char *pathname)
  *****************************************************************************/
 char *fs_getcwd(char *buf, size_t size)
 {
-    if (strlen(currentDirectoryPath > size))
+    if (strlen(currentDirectoryPath) > size)
     {
         // sizes too long, print error
         printf("ERROR PATH TOO LONG\n");

@@ -32,6 +32,9 @@ typedef struct b_fcb
 	char *buf;	//holds the open file buffer
 	int index;	//holds the current position in the buffer
 	int buflen; //holds how many valid bytes are in the buffer
+
+	//Added
+	int linuxFd; //idk if needed
 } b_fcb;
 
 b_fcb fcbArray[MAXFCBS];
@@ -124,12 +127,21 @@ int b_seek(b_io_fd fd, off_t offset, int whence) {
 
 // Interface to write function
 int b_write(b_io_fd fd, char *buffer, int count) {
+	int bytesCopied;
+
 	if (startup == 0)
 		b_init(); //Initialize our system
 
 	// check that fd is between 0 and (MAXFCBS-1)
-	if ((fd < 0) || (fd >= MAXFCBS)) {
+	if ((fd < 0) || (fd >= MAXFCBS))
+	{
 		return (-1); //invalid file descriptor
+	}
+
+	if((fcbArray[fd].index + count) > B_CHUNK_SIZE){
+		memcpy(fcbArray[fd].buf - fcbArray[fd].index, buffer, B_CHUNK_SIZE - fcbArray[fd].index);
+		bytesCopied = B_CHUNK_SIZE - fcbArray[fd].index;
+		write(fcbArray[fd].linuxFd, buffer, fcbArray[fd].buflen); //whatamidoingwhatamidoingwhatamidoingwhatamidoing
 	}
 
 	return (0); //Change this
@@ -220,5 +232,9 @@ int b_read(b_io_fd fd, char *buffer, int count) {
 
 // Interface to Close the file
 void b_close(b_io_fd fd) {
-	
+	/*
+	free(fcbArray[fd].buf);
+	fcbArray[fd].buf = NULL;
+	*/
 }
+
