@@ -6,7 +6,7 @@
 * Group Name: Arrays of Dread
 * Project: Basic File System
 *
-* File: fsDirectory.h
+* File: fsRoot.h
 *
 * Description: holds the directory functions like initialize
 * root directory, will use in conjunction with mfs.h later on.

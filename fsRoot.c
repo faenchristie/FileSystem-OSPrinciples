@@ -6,7 +6,7 @@
 * Group Name: Arrays of Dread
 * Project: Basic File System
 *
-* File: fsDirectory.c
+* File: fsRoot.c
 *
 * Description: logic for the initRoot() function and also
 * creation of the listOfEntries array
@@ -28,6 +28,7 @@ entryStruct *entry_p;
 
 /**********************************************************************
 * -----------------Initializing the root directory---------------------
+
 * First, there will need to be a malloc for the root directory which is
 * 3000 bytes. Next, Creating a pointer to an array of directory entries
 * and initializing them to be in a free state.
@@ -37,8 +38,7 @@ entryStruct *entry_p;
 * as the first entry "." except that the name will be ".."
 * Finally, return the starting block number of the root directory
 **********************************************************************/
-int initRootDir(uint64_t blockSize)
-{
+int initRootDir(uint64_t blockSize) {
 	printf("-----Initializing the root directory-----\n");
 		
 	// size of entry multiplied by defined average entries

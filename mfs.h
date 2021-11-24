@@ -41,7 +41,7 @@ typedef u_int32_t uint32_t;
 #define DEFAULTSIZE 2442
 #define BLOCKS DEFAULTSIZE / BLOCKSIZE
 
-// ************ TEAM ADDED FUNCTIONS ****************** //
+// ************ TEAM ADDED FUNCTIONS ******************
 
 entryStruct *currentEntry;
 char *parsedPath[500];
@@ -50,8 +50,6 @@ void parsePath(char *path);
 int getArrLength(char *arr[]);
 void getParentPath();
 void getEntryFromPath(char *arr[], int arrLength);
-
-// **************************************************** //
 
 // This structure is returned by fs_readdir to provide the caller with information
 // about each file as it iterates through a directory
@@ -67,8 +65,7 @@ struct fs_diriteminfo
 // from a directory.  This structure helps you (the file system) keep track of
 // which directory entry you are currently processing so that everytime the caller
 // calls the function readdir, you give the next entry in the directory
-typedef struct
-{
+typedef struct {
 	/*****TO DO:  Fill in this structure with what your open/read directory needs  *****/
 	unsigned short d_reclen;		 /*length of this record */
 	unsigned short dirEntryPosition; /*which directory entry position, like file pos */
@@ -97,15 +94,13 @@ int fs_isDir(char *path);	   //return 1 if directory, 0 otherwise
 int fs_delete(char *filename); //removes a file
 
 // This is the strucutre that is filled in from a call to fs_stat
-struct fs_stat
-{
+struct fs_stat {
 	off_t st_size;		  /* total size, in bytes */
 	blksize_t st_blksize; /* blocksize for file system I/O */
 	blkcnt_t st_blocks;	  /* number of 512B blocks allocated */
 	time_t st_accesstime; /* time of last access */
 	time_t st_modtime;	  /* time of last modification */
 	time_t st_createtime; /* time of last status change */
-
 	/* add additional attributes here for your file system */
 };
 
