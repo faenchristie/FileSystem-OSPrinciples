@@ -266,7 +266,16 @@ struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
  *****************************************************************************/
 int fs_closedir(fdDir *dirp)
 {
+    /** Verify if dirp is an open directory */
+    if(dirp = fs_opendir(dirp->name) == NULL){
+        printf("%s is not an opened directory.\n", dirp->name);
+        return -1;
+    }
     printf("Closing directory...\n");
+    /** According to the manpage, the value of dirp should be inaccessible upon
+     *  the function's return.
+     */
+    free(dirp);
     return 0;
 }
 
@@ -338,13 +347,30 @@ int fs_isDir(char *path)
  *****************************************************************************/
 int fs_stat(const char *path, struct fs_stat *buf)
 {
-    // check entries for path , declare that variable
-    struct stat * pstat; 
-    pstat = (struct stat *) buf;
-    // use this to set all values of fs_stat struct
-    /** stat() displays file or file system status; returns 0 if successful. */
-    /** See: https://pubs.opengroup.org/onlinepubs/009696799/functions/stat.html */
-    return (stat(path, pstat));
+    // find entry that matches path
+    entryStruct * entry_p;
+    char *parsedPath = parsedPath(path);
+
+    // Check if entry is a directory or file
+    if(fs_isDir(path) != 1 || fs_isFile(path) != 1){
+        printf("%s is not a valid entry.\n", path);
+        return -1;
+    }
+
+    int pathLength = getArrLength(parsedPath);
+    entry_p = getEntryFromPath(parsedPath, pathLength);
+
+    // print out entry's information
+    printf("Total Size: %d\n", (buf->st_size = entry_p->size));
+    printf("Number of blocks: %d\n", (buf->st_blocks = entry_p->blockCount));
+    printf("Blocksize: %d\n", (buf->st_blksize = vcb_p->blockSize));
+    printf("Created: %d\n", (buf->st_createtime = entry_p->st_createtime));
+    printf("Access time: %d\n", (buf->st_accesstime = entry_p->st_accesstime));
+    printf("Last modification: %d\n", (buf->st_modtime = entry_p->st_modtime));
+
+    // return 0 if successful.
+    free(entry_p);
+    return 0;
 }
 
 
@@ -660,45 +686,32 @@ char *fs_getcwd(char *buf, size_t size)
  *****************************************************************************/
 int fs_setcwd(char *buf)
 {
-    /// ***************** WORK ON THIS ******************///
-    // parse file path
+    // parse requested file path
+    char *parsedPath = parsePath(buf);
 
-    // search for directory based on path
-    // boolean
-    int found = 0;
-
-    //*****************************************************************//
-    // CHANGE TO USE NEW FIND DIR FUNC
-    //******************************************************************//
-
-    /*
-    for (int i = 0; i < numberOfEntries; i++)
-    {
-        // temp solution to avoid checking null value and getting seg fault
-        if (listofEntries != '\0')
-        {
-            if (strcmp(listOfEntries[i].path, buf))
-            {
-                found = 1;
-            }
-        }
-    }*/
-
-    // DIRECTORY NOT FOUND
-    if (!found)
-    {
-        printf("DIRECTORY NOT FOUND\n");
-        return 0;
+    // Check validity of path
+    if(fs_isDir(buf) != 1){
+        printf("%s is not a valid directory.\n", buf);
+        return -1;
     }
 
+    // search for directory based on path
+    entryStruct *entry_p;
+    int pathLength = getArrLength(parsedPath);
+    entry_p = getEntryFromPath(parsedPath, pathLength);
+
     // clear old path
-    /**********************************************/
-    // FIND PROPER WAY TO CLEAR
-    /*********************************************/
-    // currentDirectoryPath = NULL;
+    currentDirectoryPath[0] = '\0';
+    currentDirectoryPathArraySize = 0;
 
-    // set new CWD
-    strcpy(currentDirectoryPath, buf);
+    // set new CWD by copying parsed path to CurrDirPathArr
+    for(int i = 0; i < getArrLength(buf); i++){
+        strcpy(currentDirectoryPathArr[i], buf[i]);
+        sprintf(currentDirectoryPath, "%s%s", currentDirectoryPath, buf[i]);
+        currentDirectoryPathArrSize++
+    }
 
-    return 1;
+    printf("Setting cwd to %s.\n", currentDirectoryPath);
+
+    return 0;
 }

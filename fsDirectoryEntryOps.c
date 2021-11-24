@@ -138,10 +138,14 @@ int fs_mkdir(const char *pathname, mode_t mode)
 
 /******************************************************************************
  * -----remove a directory-----
- * 
+ * This function should validate if the pathname is an empty directory before
+ * removing it. If no process has the directory open, the directory's memory
+ * used will be freed and access to said directory
+ * It returns 0 if the function is successful and -1 otherwise.
  *****************************************************************************/
 int fs_rmdir(const char *pathname)
 {
+  
     // block that entry starts at
     int blockNo;
     // total blocks it uses
@@ -201,7 +205,6 @@ int fs_rmdir(const char *pathname)
     {
         freeMap[i] = 0;
     }
-
     return 0;
 }
 
