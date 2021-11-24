@@ -63,19 +63,24 @@ char currentDirectoryPathArraySize[50];
 /******************************************************************************
  *                        -----returns length of arr-----
  * Takes a char array as input and returns the length of it. This will be
- * used to dissect the parent path. Returns int length.
+ * used to dissect the parent path.
+ * 
+ * create a variable to track the count
+ * while loop under the condition that the array count is not null, update the
+ * count.
+ * 
+ * @return count
  *****************************************************************************/
-
 int getArrLength(char *arr[]) {
     printf("GET ARR LENGTH FUNCTION\n");
-    // tracks length
+
     int count = 0;
     // will go until null is found
-    while (arr[count] != NULL) //removed (arr[count] != ('\0')||)
-    {
+    while (arr[count] != NULL) { //removed (arr[count] != ('\0')||) 
         printf("GET ARR LENGTH FUNCTION 2\n");
         count++;
     }
+
     printf("END ARR LENGTH FUNCTION\n");
     return count;
 }
@@ -86,7 +91,6 @@ int getArrLength(char *arr[]) {
  * removing the last part of the path (the child). This parent path can then be
  * used in conjunction with getEntryFromPath to return the entry.
  *****************************************************************************/
-
 void getParentPath(){
     printf("get Parent Path Function\n");
     // nullify past parent path
@@ -113,7 +117,6 @@ void getParentPath(){
  *  Reads through parsed path one name at a time. Starts by opening root directory. 
  * Returns a pointer to an array of entries.
  *****************************************************************************/
-
 void getEntryFromPath(char *arr[], int arrLength){
     printf("arrLength is %i :\n",arrLength);
     printf("GETENTRYFROMPATH REACHED\n");
@@ -247,7 +250,6 @@ fdDir *fs_opendir(const char *name) {
  * update the index
  * 
  * @return address of directoryEntry
- * 
  *****************************************************************************/
 struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
 
