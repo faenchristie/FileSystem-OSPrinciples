@@ -43,7 +43,7 @@ typedef u_int32_t uint32_t;
 
 // ************ TEAM ADDED FUNCTIONS ******************
 
-entryStruct *currentEntry;
+
 char *parsedPath[500];
 char *parentPath[500];
 char currentDirectoryPath[200]; //from old fsDirectoryEntryOps.c
