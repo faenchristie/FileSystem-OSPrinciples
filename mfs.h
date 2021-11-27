@@ -46,6 +46,8 @@ typedef u_int32_t uint32_t;
 entryStruct *currentEntry;
 char *parsedPath[500];
 char *parentPath[500];
+char currentDirectoryPath[200]; //from old fsDirectoryEntryOps.c
+int currentDirectoryPathArraySize;
 void parsePath(char *path);
 int getArrLength(char *arr[]);
 void getParentPath();
