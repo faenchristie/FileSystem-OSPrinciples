@@ -100,6 +100,9 @@ int initRootDir(uint64_t blockSize) {
 	// free malloc'd space
 	free(entry_p);
 
+	// set cwd to root
+	fs_setcwd("/");
+
 	// return location of root for VCB to store
 	return freeBlock;
 }

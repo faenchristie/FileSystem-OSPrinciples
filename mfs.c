@@ -422,11 +422,22 @@ int fs_isDir(char *path) {
     getEntryFromPath(parsedPath,pathLength);
     printf("currentEntry.type %i\n",currentEntry[0].type);
     if(currentEntry[0].type == 1){
+        printf("type == 1\n");
+        printf("before free\n");
+        if(currentEntry!=NULL){
+        printf("currentEntry!=NULL\n");
+        free(currentEntry);
+        printf("after free\n");
+        currentEntry = NULL;
+        }
+        printf("after null\n");
         return 1;
     }else{
+        printf("type != 1\n");
+        free(currentEntry);
+        currentEntry = NULL;
         return 0;
     }
-    free(currentEntry);
 }
 
 /******************************************************************************
@@ -807,6 +818,7 @@ int fs_setcwd(char *buf) {
     // parse requested file path
     //char *parsedPath = parsePath(buf);
     parsePath(buf);
+    printf("after path parse\n");
 
     // Check validity of path
     if(fs_isDir(buf) != 1){
@@ -817,13 +829,16 @@ int fs_setcwd(char *buf) {
     // search for directory based on path
     //entryStruct *entry_p;
     int pathLength = getArrLength(parsedPath);
-    getEntryFromPath(parsedPath, pathLength);
+    printf("before get entry\n");
+    //getEntryFromPath(parsedPath, pathLength);
+    printf("after get entry\n");
 
     // clear old path
     currentDirectoryPath[0] = '\0';
     // ******* INVALID ********
     //currentDirectoryPathArraySize = 0;
 
+/*
     // set new CWD by copying parsed path to CurrDirPathArr
     for(int i = 0; i < getArrLength(parsedPath); i++) {
         strcpy(currentDirectoryPath[i], parsedPath[i]);
@@ -831,9 +846,11 @@ int fs_setcwd(char *buf) {
         //sprintf(currentDirectoryPath, "%s,%s", currentDirectoryPath, buf[i]);
         // ********* INVALID *********
         //currentDirectoryPathArraySize++;
-    }
+    }*/
 
-    printf("Setting cwd to %s.\n", currentDirectoryPath);
+    strcpy(currentDirectoryPath,buf);
+
+    printf("Setting cwd to %s\n", currentDirectoryPath);
 
     return 0;
 }
