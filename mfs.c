@@ -26,9 +26,11 @@
  * GLOBAL VARIABLES HERE
  *****************************************************************************/
 entryStruct *currentEntry = NULL;
+entryStruct *parentEntry = NULL;
 struct fs_diriteminfo * directoryEntry = NULL;
 //readDirIndex = 2;
 //readDirRead = 0;
+int entrySize = sizeof(entryStruct) * DIRENTRIES;
 
 /******************************************************************************
  *                        -----parses file path-----
@@ -111,69 +113,69 @@ void getParentPath(){
  *****************************************************************************/
 void getEntryFromPath(char *arr[], int arrLength){
     //printf("arrLength is %i :\n",arrLength);
-    //printf("GETENTRYFROMPATH REACHED\n");
+    printf("GETENTRYFROMPATH REACHED\n");
     // malloc space needed: size of struct * average entries for directory
-    int entrySize = sizeof(entryStruct) * DIRENTRIES;
+    //int entrySize = sizeof(entryStruct) * DIRENTRIES;
     if(currentEntry == NULL){
-    //printf("MALLOC CURRENTENTRY\n");
+    printf("MALLOC CURRENTENTRY\n");
     currentEntry = malloc(entrySize);
     }
 
-    //printf("GETENTRY ERROR 1\n");
+    printf("GETENTRY ERROR 1\n");
     //entryStruct *tempEntry;
-    //printf("GETENTRY ERROR 1.1\n");
+    printf("GETENTRY ERROR 1.1\n");
     //tempEntry = malloc(entrySize);
     
-    //printf("GETENTRY ERROR 2\n");
+    printf("GETENTRY ERROR 2\n");
     // read in root directory into entry_p. 
     LBAread(currentEntry, vcb_p->rootDirBlocks, vcb_p->rootDir);
-    //printf("GETENTRY ERROR 3\n");
+    printf("GETENTRY ERROR 3\n");
 
     // return root 
     if(strlen(arr)==0||strcmp(arr[0],"")==0){
-        //printf("Strlen == 0\n");
+        printf("Strlen == 0\n");
         return;
     }
 
     // "boolean" that checks if parent entry was found
     int found = 0;
 
-    //printf("GETENTRY ERROR 4\n");
+    printf("GETENTRY ERROR 4\n");
     // first for loop loops through each segment of the path
     for(int i = 0; i < arrLength; i++){
-        //printf("GETENTRY ERROR 5\n");
+        printf("GETENTRY ERROR 5\n");
         // inner for loop loops through each entry of the directory
         for(int j = 2; j < DIRENTRIES; j++){
-            //printf("GETENTRY ERROR 6\n");
+            printf("GETENTRY ERROR 6\n");
             // ******************** //
             // NOTE: Should I check if value is null to avoid segfault?
             // ******************** //
-            //printf("tempEntry name: %s\n", currentEntry[j].name);
+            printf("tempEntry name: %s\n", currentEntry[j].name);
             //printf("arr[0]: %s\n", arr[0]);
             // compares the path name to the  name of each directory entry
             if(strcmp(currentEntry[j].name,arr[i])==0){
-                //printf("GETENTRY ERROR 7\n");
+                printf("GETENTRY ERROR 7\n");
                 //printf("currentEntry block count: %i\n",currentEntry[j].blockCount);
                 //printf("currentEntry block location: %i\n",currentEntry[j].blockLocation);
                 // read next directory into tempEntry if matches
                 int blockCount = currentEntry[j].blockCount;
                 int blockLocation = currentEntry[j].blockLocation;
                 LBAread(currentEntry, currentEntry[j].blockCount, currentEntry[j].blockLocation);
-                //printf("GETENTRY ERROR 8\n");
+                printf("GETENTRY ERROR 8\n");
                 // move onto next entry
                 //currentEntry = tempEntry;
                 //printf("currentEntry block count: %i\n",currentEntry[j].blockCount);
                 //printf("currentEntry block location: %i\n",currentEntry[j].blockLocation);
                 //printf("currentEntry type: %i\n",currentEntry[j].type);
-                //printf("GETENTRY ERROR 9\n");
+                printf("GETENTRY ERROR 9\n");
                 found = 1;
                 break;
             } else{
                 // make entry_p null if not found. This will be used to check
                 // if the directory was found. 
-                //printf("GETENTRY ERROR 10\n");
+                printf("GETENTRY ERROR 10\n");
                 //currentEntry = NULL;
-                //printf("GETENTRY ERROR 11\n");
+                printf("GETENTRY ERROR 11\n");
                 // not found
                 found = 0;
             }
@@ -193,7 +195,7 @@ void getEntryFromPath(char *arr[], int arrLength){
         }*/
     }
     //printf("Current entry block location: %i\n", currentEntry[0].blockLocation);
-    //printf("GETENTRY ERROR 12\n");
+    printf("GETENTRY ERROR 12\n");
  
     return;
 }
@@ -296,7 +298,7 @@ struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
     }
     // use to find entry
     entryStruct *entry;
-    int entrySize = sizeof(entryStruct) * DIRENTRIES;
+    //int entrySize = sizeof(entryStruct) * DIRENTRIES;
     entry = malloc(entrySize);
     // start at previous index + 1 to start
     int start = dirp->readDirIndex + 1;
@@ -420,22 +422,22 @@ int fs_isDir(char *path) {
 
     // returns to global vatiable currentEntry
     getEntryFromPath(parsedPath,pathLength);
-    printf("currentEntry.type %i\n",currentEntry[0].type);
+    //printf("currentEntry.type %i\n",currentEntry[0].type);
+    // if it is a directory, return successful
     if(currentEntry[0].type == 1){
-        printf("type == 1\n");
-        printf("before free\n");
+        // make sure to check if currentEntry needs to be freed
         if(currentEntry!=NULL){
-        printf("currentEntry!=NULL\n");
         free(currentEntry);
-        printf("after free\n");
         currentEntry = NULL;
         }
-        printf("after null\n");
         return 1;
     }else{
-        printf("type != 1\n");
+        // make sure to check if currentEntry needs to be freed
+        if(currentEntry!=NULL){
         free(currentEntry);
         currentEntry = NULL;
+        }
+        // return unsucsseful if not directory
         return 0;
     }
 }
@@ -524,7 +526,7 @@ int fs_delete(char *filename) {
         return 0;
     } else { // if entry is valid
         entryStruct *parentEntry;
-        int entrySize = sizeof(entryStruct) * DIRENTRIES;
+        //int entrySize = sizeof(entryStruct) * DIRENTRIES;
         parentEntry = malloc(entrySize);
         int parentLocation = currentEntry[0].parent;
         int parentCount = currentEntry[0].parentCount;
@@ -567,7 +569,7 @@ int fs_mkdir(const char *pathname, mode_t mode) {
     // to fix const char error
     char * path = (char *)pathname;
     // malloc space needed: size of struct * average entries for directory
-    int entrySize = sizeof(entryStruct) * DIRENTRIES;
+    //int entrySize = sizeof(entryStruct) * DIRENTRIES;
     entryStruct * entry_p;
     // malloc space for entry_p
     entry_p = malloc(entrySize);
@@ -720,33 +722,44 @@ int fs_rmdir(const char *pathname) {
 
     // get entry save in global variable currentEntry
     getEntryFromPath(parsedPath, pathLength);
-    
+    printf("RM DIR 1\n");
     if(currentEntry != NULL){
         found = 1;
     }
-
+    printf("RM DIR 2\n");
     // if not found
     if (!found) {
         printf("DIRECTORY DOES NOT EXIST\n");
+        // free currentEntry
+        free(currentEntry);
+        currentEntry = NULL;
         return -1;
     }
-
+    printf("RM DIR 3\n");
     // check if directory has children or not
     if(currentEntry[0].childrenAmount != 0){
+        // free currentEntry
+        free(currentEntry);
+        currentEntry = NULL;
         printf("CANNOT DELETE DIRECTORY WITH ENTRIES");
         return -1;
     }
-
+    printf("RM DIR 4\n");
     // variables needed to find parent entry
-    entryStruct *parentEntry;
-    int entrySize = sizeof(entryStruct) * DIRENTRIES;
+    //entryStruct *parentEntry;
+    printf("RM DIR 5\n");
+    //int entrySize = sizeof(entryStruct) * DIRENTRIES;
+    if(parentEntry==NULL){
+    printf("parentEntry==NULL\n");
     parentEntry = malloc(entrySize);
+    }
+    printf("RM DIR 6\n");
     int parentLocation = currentEntry[0].parent;
     int parentCount = currentEntry[0].parentCount;
-
+    printf("RM DIR 7\n");
     // read parent into memory using variables stored in dir
     LBAread(parentEntry,parentCount,parentLocation);
-
+    printf("RM DIR 8\n");
     // find child in parent entry to remove from its list
     for(int i = 0; i < DIRENTRIES; i++) {
         // if name matches, entry found
@@ -771,9 +784,11 @@ int fs_rmdir(const char *pathname) {
         freeMap[i] = 0;
     }
 
-    // free malloc'd space
+    // free malloc'd space, NULLify for reference
     free(parentEntry);
+    parentEntry = NULL;
     free(currentEntry);
+    currentEntry == NULL;
 
     return 0;
 }

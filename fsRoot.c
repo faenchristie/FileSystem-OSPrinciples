@@ -23,6 +23,8 @@
 
 entryStruct *entry_p;
 
+
+
 // some sort of way to keep track of our entries?
 //array of directory entries witht he size 5 * 512 which is 2,560 bytes
 
