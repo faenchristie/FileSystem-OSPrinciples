@@ -69,6 +69,7 @@ int initRootDir(uint64_t blockSize) {
 	entry_p[0].blockCount = blocksNeeded; 
 	entry_p[0].size = entrySize;
 	entry_p[0].type=1; // directory
+	entry_p[0].childrenAmount = 0;
 	// path of root directory
 	//entry_p[0].path="/";
 

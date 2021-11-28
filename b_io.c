@@ -108,7 +108,7 @@ b_io_fd b_open(char *filename, int flags) {
 	fcb->buflen = 0;
 	fcb->index = 0;
 
-	printf("b_open: opening file '%s' with file descriptor %d\n", filename, fd);
+	//printf("b_open: opening file '%s' with file descriptor %d\n", filename, fd);
 
 	return (returnFd); // all set
 }
