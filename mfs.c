@@ -26,6 +26,9 @@
  * GLOBAL VARIABLES HERE
  *****************************************************************************/
 entryStruct *currentEntry = NULL;
+struct fs_diriteminfo * directoryEntry = NULL;
+//readDirIndex = 2;
+//readDirRead = 0;
 
 /******************************************************************************
  *                        -----parses file path-----
@@ -309,19 +312,65 @@ fdDir *fs_opendir(const char *name) {
  *****************************************************************************/
 struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
     printf("READDIR FUNCTION\n");
-    int readdirIndex = 0; //Keeps track of children count
-    struct fs_diriteminfo directoryEntry;
 
-    if(readdirIndex == dirp->childrenAmount){
-        readdirIndex = 0;
-        printf("Could not read.\n");
+    // malloc only if needed
+    if(directoryEntry==NULL){
+    directoryEntry = malloc(sizeof(fs_diriteminfo));
+    }
+
+    // check if we went through all children
+    if(dirp->readDirRead == dirp->childrenAmount){
+        // index of children starts at 2 , 0 and 1 are . and ..
+        dirp->readDirIndex = 2;
+        dirp->readDirRead = 0;
+        printf("No more entries.\n");
+        // finally free directoryEntry
+        free(directoryEntry);
         return NULL;
     }
 
-    readdirIndex++;
+    // use to find entry
+    entryStruct *entry;
+    int entrySize = sizeof(entryStruct) * DIRENTRIES;
+    entry = malloc(entrySize);
+    // start at previous index + 1 to start
+    int start = dirp->readDirIndex + 1;
+
+    // read entry into memory
+    LBAread(entry, dirp->directoryBlockAmount, dirp->directoryStartLocation);
+
+    // cycle through entries 
+    for(int i=start; i>DIRENTRIES; i++){
+
+        // if entry is not unused, 0 means undefined entry
+        if(entry[i].type!=0){
+
+            // assign type
+            if(entry[i].type==1){
+                directoryEntry->fileType = "Directory";
+            }
+            if(entry[i].type==2){
+                directoryEntry->fileType = "File";
+            }
+            // assign name
+            directoryEntry->d_name = entry[i].name;
+
+            // index of found entry will be used for next read
+            dirp->readDirIndex = i;
+
+            // break from loop
+            break;
+        }
+    }
+
+    // increment amount of children read
+    dirp->readDirRead++;
+
+    // free entry 
+    free(entry);
 
     // check out this return type later, giving warning
-    return &directoryEntry;
+    return directoryEntry;
 }
 
 /******************************************************************************

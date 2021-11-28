@@ -48,6 +48,10 @@ char *parsedPath[500];
 char *parentPath[500];
 char currentDirectoryPath[200]; //from old fsDirectoryEntryOps.c
 int currentDirectoryPathArraySize;
+// keeps track of index of entry
+int readDirIndex;
+// keeps track of amount of children read
+int readDirRead;
 void parsePath(char *path);
 int getArrLength(char *arr[]);
 void getParentPath();
@@ -77,6 +81,10 @@ typedef struct {
 	char name[256];
 	// amount of blocks directory uses
 	uint64_t directoryBlockAmount;
+	// amount of entries read
+	int readDirRead;
+	// index we are at
+	int readDirIndex;
 } fdDir;
 
 // Key directory functions
