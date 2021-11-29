@@ -70,24 +70,23 @@ b_io_fd b_getFCB()
 	return (-1); //all in use
 }
 
-// Interface to open a buffered file
-// Modification of interface for this assignment, flags match the Linux flags for open
-// O_RDONLY, O_WRONLY, or O_RDWR
+/******************************************************************************
+ * Interface to open a buffered file
+ * Modification of interface for this assignment, flags match the linux flags
+ * for open
+ * O_RDONLY, O_WRONLY, or O_RDWR
+ *****************************************************************************/
 b_io_fd b_open(char *filename, int flags) {
 
 	b_io_fd fd; 
 	b_io_fd returnFd;
 	b_fcb * fcb;
 
-	//*** TODO ***:  Modify to save or set any information needed
-	//
-	// possibly not complete yet
-
 	if (startup == 0)
 		b_init(); //Initialize our system
 
 	returnFd = b_getFCB(); // get our own file descriptor
-						   // check for error - all used FCB's
+	// check for error - all used FCB's
 
 	//error check for return fcb
 	if(returnFd < 0) {
@@ -129,44 +128,67 @@ int b_seek(b_io_fd fd, off_t offset, int whence) {
 // Interface to write function
 int b_write(b_io_fd fd, char *buffer, int count) {
 	int bytesCopied;
+	int nextBytesCopied = count - bytesCopied;
+	int freeSpace = bufSize - fcb->index;
 
 	if (startup == 0)
 		b_init(); //Initialize our system
 
 	// check that fd is between 0 and (MAXFCBS-1)
-	if ((fd < 0) || (fd >= MAXFCBS))
-	{
+	if ((fd < 0) || (fd >= MAXFCBS)) {
 		return (-1); //invalid file descriptor
 	}
 
-	if((fcbArray[fd].index + count) > B_CHUNK_SIZE){
-		memcpy(fcbArray[fd].buf - fcbArray[fd].index, buffer, B_CHUNK_SIZE - fcbArray[fd].index);
-		bytesCopied = B_CHUNK_SIZE - fcbArray[fd].index;
-		write(fcbArray[fd].linuxFd, buffer, fcbArray[fd].buflen); //whatamidoingwhatamidoingwhatamidoingwhatamidoing
+	if (freeSpace > count) {
+		bytesCopied = count;
+	} else {
+		bytesCopied = freeSpace;
 	}
 
-	return (0); //Change this
+	memcpy(fcb->buf + fcb->index, buffer, bytesCopied);
+	fcb->index = fcb->index + bytesCopied;
+
+	if (nextBytesCopied != 0) {
+		//find the next free block
+		//if (block is not free)
+			//throw error if there is not enough space to write
+		//else (write the data to disk)
+	fcb->index = 0;
+	memcpy(fcb->buf + fcb->index, buffer + bytesCopied, nextBytesCopied);
+	fcb->index = fcb->index + nextBytesCopied;
+	}
+	
+	int totalBytesCopied = bytesCopied + nextBytesCopied;
+	return totalBytesCopied;
 }
 
-// Interface to read a buffer
-
-// Filling the callers request is broken into three parts
-// Part 1 is what can be filled from the current buffer, which may or may not be enough
-// Part 2 is after using what was left in our buffer there is still 1 or more block
-//        size chunks needed to fill the callers request.  This represents the number of
-//        bytes in multiples of the blocksize.
-// Part 3 is a value less than blocksize which is what remains to copy to the callers buffer
-//        after fulfilling part 1 and part 2.  This would always be filled from a refill
-//        of our buffer.
-//  +-------------+------------------------------------------------+--------+
-//  |             |                                                |        |
-//  | filled from |  filled direct in multiples of the block size  | filled |
-//  | existing    |                                                | from   |
-//  | buffer      |                                                |refilled|
-//  |             |                                                | buffer |
-//  |             |                                                |        |
-//  | Part1       |  Part 2                                        | Part3  |
-//  +-------------+------------------------------------------------+--------+
+/******************************************************************************
+ * Interface to read a buffer
+ * 
+ * Filling the callers request is broken into three parts
+ * Part 1 is what can be filled from the current buffer, which may or may not 
+ * be enough
+ * 
+ * Part 2 is after using what was left in our buffer there is still 1 or more
+ * block size chunks needed to fill the callers request.  This represents the 
+ * number of bytes in multiples of the blocksize.
+ * 
+ * Part 3 is a value less than blocksize which is what remains to copy to the 
+ * callers buffer after fulfilling part 1 and part 2.  This would always be 
+ * filled from a refill of our buffer.
+ * 
+ * +-------------+------------------------------------------------+--------+
+ * |             |                                                |        |
+ * | filled from |  filled direct in multiples of the block size  | filled |
+ * | existing    |                                                | from   |
+ * | buffer      |                                                |refilled|
+ * |             |                                                | buffer |
+ * |             |                                                |        |
+ * | Part1       |  Part 2                                        | Part3  |
+ * +-------------+------------------------------------------------+--------+
+ * 
+ * @return bytesReturned
+ *****************************************************************************/    
 int b_read(b_io_fd fd, char *buffer, int count) {
 
 	int bytesRead, bytesReturned; // for what we read and what we will return
