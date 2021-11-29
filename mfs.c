@@ -263,6 +263,9 @@ fdDir *fs_opendir(const char *name) {
     free(currentEntry);
     printf("FREED\n");
     }*/
+    free(currentEntry);
+    currentEntry = NULL;
+    
     return dir;
 }
 /******************************************************************************

@@ -34,14 +34,14 @@
 
 /****   SET THESE TO 1 WHEN READY TO TEST THAT COMMAND ****/
 #define CMDLS_ON 1
-#define CMDCP_ON 0
+#define CMDCP_ON 1
 #define CMDMV_ON 0
 #define CMDMD_ON 1
-#define CMDRM_ON 0
+#define CMDRM_ON 1
 #define CMDCP2L_ON 0
 #define CMDCP2FS_ON 0
-#define CMDCD_ON 0
-#define CMDPWD_ON 0
+#define CMDCD_ON 1
+#define CMDPWD_ON 1
 
 typedef struct dispatch_t
 {
@@ -81,10 +81,10 @@ static int dispatchcount = sizeof(dispatchTable) / sizeof(dispatch_t);
 int displayFiles(fdDir *dirp, int flall, int fllong)
 {
 #if (CMDLS_ON == 1)
-	printf("error");
-	if (dirp == NULL) //get out if error
+	if (dirp == NULL){ //get out if error
 		return (-1);
-
+		printf("error\n");
+	}
 	struct fs_diriteminfo *di;
 	struct fs_stat statbuf;
 
@@ -188,6 +188,7 @@ int cmd_ls(int argcnt, char *argvec[])
 		{
 			if (fs_isDir(argvec[k]))
 			{
+				printf("Is Dir function\n");
 				fdDir *dirp;
 				dirp = fs_opendir(argvec[k]);
 				displayFiles(dirp, flall, fllong);
@@ -196,6 +197,7 @@ int cmd_ls(int argcnt, char *argvec[])
 			{
 				if (fs_isFile(argvec[k]))
 				{
+					printf("is File function\n");
 					//no support for long format here
 					printf("%s\n", argvec[k]);
 				}
@@ -249,11 +251,16 @@ int cmd_cp(int argcnt, char *argvec[])
 	}
 
 	testfs_src_fd = b_open(src, O_RDONLY);
+	printf("b_open 1\n");
 	testfs_dest_fd = b_open(dest, O_WRONLY | O_CREAT | O_TRUNC);
+	printf("b_open 2\n");
 	do
 	{
+		printf("do\n");
 		readcnt = b_read(testfs_src_fd, buf, BUFFERLEN);
+		printf("b_read \n");
 		b_write(testfs_dest_fd, buf, readcnt);
+		printf("b_write\n");
 	} while (readcnt == BUFFERLEN);
 	b_close(testfs_src_fd);
 	b_close(testfs_dest_fd);
@@ -269,7 +276,17 @@ int cmd_mv(int argcnt, char *argvec[])
 #if (CMDMV_ON == 1)
 	return -99;
 	// **** TODO ****  For you to implement
-
+	// check if file, if not, exit with error
+	// write function that gets entry
+	// store entry in local variable
+	// free currentEntry and NULL
+	// call remove entry
+	// change values for the entry in regards to where
+	// it is being moved.
+	// find entry that we are trying to move it to
+	// add values to the parent entry
+	// save to memory 
+	// exit with success code
 #endif
 	return 0;
 }
@@ -437,7 +454,7 @@ int cmd_cd(int argcnt, char *argvec[])
 		printf("Could not change path to %s\n", path);
 		return (ret);
 	}
-#endif
+   #endif
 	return 0;
 }
 
