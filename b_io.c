@@ -29,13 +29,26 @@
 
 typedef struct b_fcb
 {
-	/** TODO add al the information you need in the file control block **/
-	char *buf;	//holds the open file buffer
-	int index;	//holds the current position in the buffer
-	int buflen; //holds how many valid bytes are in the buffer
+	entryStruct *fi; //holds the low level systems file info
+	// Add any other needed variables here to track the individual open file
 
-	//Added
-	int linuxFd; //idk if needed
+	// file id / location in array
+	int id;
+
+	// our buffer for reading file
+	char *f_buffer;
+
+	int buflen;
+	int index;
+
+	// offset of file / offset of buffer(when partial)
+	int f_offset;
+	int b_offset;
+
+	// block location, track amount already read to user
+	int loc;
+	int read;
+
 } b_fcb;
 
 b_fcb fcbArray[MAXFCBS];
@@ -51,7 +64,7 @@ void b_init() {
 	//init fcbArray to all free
 	for (int i = 0; i < MAXFCBS; i++)
 	{
-		fcbArray[i].buf = NULL; //indicates a free fcbArray
+		fcbArray[i].f_buffer = NULL; //indicates a free fcbArray
 	}
 
 	startup = 1;
@@ -62,7 +75,7 @@ b_io_fd b_getFCB()
 {
 	for (int i = 0; i < MAXFCBS; i++)
 	{
-		if (fcbArray[i].buf == NULL)
+		if (fcbArray[i].f_buffer == NULL)
 		{
 			return i; //Not thread safe (But do not worry about it for this assignment)
 		}
@@ -96,10 +109,10 @@ b_io_fd b_open(char *filename, int flags) {
 	fcb = &fcbArray[returnFd];
 
 	//allocate the buffer to the size of our vcb
-	fcb->buf = malloc(bufSize + 1);
+	fcb->f_buffer = malloc(bufSize + 1);
 
 	//error check for if there is not enough space
-	if (fcb->buf == NULL) {
+	if (fcb->f_buffer == NULL) {
 		close(fd);
 		return -1;
 	}
@@ -128,8 +141,10 @@ int b_seek(b_io_fd fd, off_t offset, int whence) {
 // Interface to write function
 int b_write(b_io_fd fd, char *buffer, int count) {
 	int bytesCopied;
+	b_fcb * fcb;
 	int nextBytesCopied = count - bytesCopied;
 	int freeSpace = bufSize - fcb->index;
+
 
 	if (startup == 0)
 		b_init(); //Initialize our system
@@ -145,7 +160,7 @@ int b_write(b_io_fd fd, char *buffer, int count) {
 		bytesCopied = freeSpace;
 	}
 
-	memcpy(fcb->buf + fcb->index, buffer, bytesCopied);
+	memcpy(fcb->f_buffer + fcb->index, buffer, bytesCopied);
 	fcb->index = fcb->index + bytesCopied;
 
 	if (nextBytesCopied != 0) {
@@ -154,7 +169,7 @@ int b_write(b_io_fd fd, char *buffer, int count) {
 			//throw error if there is not enough space to write
 		//else (write the data to disk)
 	fcb->index = 0;
-	memcpy(fcb->buf + fcb->index, buffer + bytesCopied, nextBytesCopied);
+	memcpy(fcb->f_buffer + fcb->index, buffer + bytesCopied, nextBytesCopied);
 	fcb->index = fcb->index + nextBytesCopied;
 	}
 	
@@ -187,13 +202,10 @@ int b_write(b_io_fd fd, char *buffer, int count) {
  * | Part1       |  Part 2                                        | Part3  |
  * +-------------+------------------------------------------------+--------+
  * 
- * @return bytesReturned
+ * 
  *****************************************************************************/    
+ // Used mostly team member Natalie Christie's logic from Assignment 2b 
 int b_read(b_io_fd fd, char *buffer, int count) {
-
-	int bytesRead, bytesReturned; // for what we read and what we will return
-	int part1, part2, part3;
-	int blocksToCopy, leftoverBytes; // holds blocks needed to copy and how many bytes are left in buffer
 
 	if (startup == 0)
 		b_init(); //Initialize our system
@@ -204,53 +216,121 @@ int b_read(b_io_fd fd, char *buffer, int count) {
 		return (-1); //invalid file descriptor
 	}
 
-	leftoverBytes = fcbArray[fd].buflen - fcbArray[fd].index; // remaining bytes available in buffer
-
-	if (leftoverBytes >= count) // Check if there is enough bytes in buffer
+	if (fcbArray[fd].fi == NULL) //File not open for this descriptor
 	{
-		part1 = count; // No need to set part 2 and 3 if there are enough bytes in buffer.
-		part2 = 0, part3 = 0;
-	} else {
-		part1 = leftoverBytes; // First read
-
-		part3 = count - leftoverBytes; // part3 holds how many bytes that still need to be copied to buffer
-
-		// Calculate how many 512 byte chunks are needed to be copied
-		blocksToCopy = part3 / B_CHUNK_SIZE; 
-		part2 = blocksToCopy * B_CHUNK_SIZE; 
-
-		part3 = part3 - part2; // Leftover bytes from part2 that didn't fit the 512 byte chunk size
+		return -1;
 	}
 
-	if (part1 > 0) // memcpy to buffer with the part1 size, and then increment index with part1's size 
+	// return if amount read is greater than or equal to file size
+	// return 0 to signify read is done 
+	if (fcbArray[fd].read >= fcbArray[fd].fi->size)
 	{
-		memcpy(buffer, fcbArray[fd].buf + fcbArray[fd].index, part1);
-		fcbArray[fd].index = fcbArray[fd].index + part1;
+		return 0;
 	}
 
-	if (part2 > 0){
-		// bytesRead = LBAread(buffer + part1, blocksToCopy, fcbArray[fd].currentBlk + fcbArray[fd].fi->location);
-		// fcbArray[fd].currentBlk += blocksToCopy;
-		part2 = bytesRead;
-	}
+	// keeps track of how much we have left remaining to read
+	int remainder = count;
 
-	if (part3 > 0) {
-		// bytesRead = LBAread(fcbArray[fd].buf, 1, fcbArray[fd].currentBlk + fcbArray[fd].fi->location);
-		// fcbArray[fd].currentBlk += 1;
-		fcbArray[fd].index = 0;
-		fcbArray[fd].buflen = bytesRead;
+	// while loop that will keep looping until all is read
+	// to the user.
+	while (remainder != 0)
+	{
 
-		if (bytesRead < part3) {
-			part3 = bytesRead;
+		// initialize buffer if empty, do first LBAread, increment loc
+		// for next read
+		if (strlen(buffer) == 0)
+		{
+			LBAread(fcbArray[fd].f_buffer, 1, fcbArray[fd].loc);
+			fcbArray[fd].loc++;
 		}
 
-		if (part3 > 0) {
-			memcpy(buffer + part1 + part2, fcbArray[fd].buf + fcbArray[fd].index, part3);
-			fcbArray[fd].index = fcbArray[fd].index + part3;
+		// finds offset of user buffer so we don't overwrite
+		// any memory 
+		int user_offset = count - remainder;
+
+		// checks if count is still greater than 512, will
+		// continue looping
+		if (remainder > B_CHUNK_SIZE)
+		{
+
+			// remaining amount in buffer we can copy
+			int buff_amt = B_CHUNK_SIZE - fcbArray[fd].b_offset;
+
+			// copies at offset of user buffer from offset of buffer,
+			// only the amount left in buffer.
+			memcpy(buffer + user_offset, fcbArray[fd].f_buffer
+			 + fcbArray[fd].b_offset, buff_amt);
+
+			// updates remaining amount that we have to read
+			remainder = remainder - buff_amt;
+
+			// copies new 512 block into buffer
+			LBAread(fcbArray[fd].f_buffer, 1, fcbArray[fd].loc);
+
+			// increment location of block
+			fcbArray[fd].loc++;
+
+			// update amount read to user
+			fcbArray[fd].read += count;	
+
+			// updates buffer offset to 0 as we have copied final amount
+			fcbArray[fd].b_offset = 0;
+		}
+		else
+		{
+			// if remaining amount is less than the amount left in buffer,
+			// no need to LBAread
+			if (remainder < B_CHUNK_SIZE - fcbArray[fd].b_offset)
+			{
+				// copies remaining amount to user buffer at offset
+				memcpy(buffer + user_offset, fcbArray[fd].f_buffer + fcbArray[fd].b_offset,
+					   remainder);
+
+				// buffer offset is whatever amount we have just read
+				fcbArray[fd].b_offset += remainder;
+				fcbArray[fd].read += count;
+
+				// nothing left to read
+				remainder = 0;
+			}
+
+			else
+			{
+
+				// remaining amount in buffer
+				int rem_buff = B_CHUNK_SIZE - fcbArray[fd].b_offset;
+
+				// calculate remaining amount after buffer
+				int after_buff = remainder - rem_buff;
+
+				// copy remaining amount in buffer to user
+				memcpy(buffer + user_offset, fcbArray[fd].f_buffer + fcbArray[fd].b_offset,
+					   rem_buff);
+
+				// increment offset of user buffer as to not overwrite
+				user_offset += rem_buff;
+
+				// read one block of 512 bytes into our buffer
+				LBAread(fcbArray[fd].f_buffer, 1, fcbArray[fd].loc);
+
+				// copy remaining amount from buffer to user
+				memcpy(buffer + user_offset, fcbArray[fd].f_buffer, after_buff);
+
+				// what was just copied is now the buffer offset
+				fcbArray[fd].b_offset = after_buff;
+
+				// increment location of file block
+				fcbArray[fd].loc += 1;
+
+				// increment amount read to user
+				fcbArray[fd].read += count;
+
+				remainder = 0;
+			}
 		}
 	}
-	bytesReturned = part1 + part2 + part3;
-	return (bytesReturned);
+	// return amount read to the user
+	return count;
 }
 
 // Interface to Close the file

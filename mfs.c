@@ -130,7 +130,7 @@ void getEntryFromPath(char *arr[], int arrLength){
     printf("GETENTRY ERROR 3\n");
 
     // return root 
-    if(strlen(arr)==0||strcmp(arr[0],"")==0){
+    if(strlen(arr[0])==0||strcmp(arr[0],"")==0){
         printf("Strlen == 0\n");
         return;
     }
@@ -311,10 +311,10 @@ struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
 
             // assign type
             if(entry[i].type==1){
-                directoryEntry->fileType = "Directory";
+                strcpy(directoryEntry->fileType,"Directory");
             }
             if(entry[i].type==2){
-                directoryEntry->fileType = "File";
+                strcpy(directoryEntry->fileType,"File");
             }
             // assign name
             strcpy(directoryEntry->d_name,entry[i].name);
@@ -462,9 +462,7 @@ int fs_isDir(char *path) {
  * @return 0
  *****************************************************************************/
 int fs_stat(const char *path, struct fs_stat *buf) {
-    // find entry that matches path
-    entryStruct * entry_p;
-    //char *parsedPath = parsedPath(path);
+    
     
     // to fix const char error
     char * filepath = (char *)path;
@@ -484,7 +482,9 @@ int fs_stat(const char *path, struct fs_stat *buf) {
     printf("Number of blocks: %ld\n", (buf->st_blocks = currentEntry[0].blockCount));
     printf("Blocksize: %ld\n", (buf->st_blksize = vcb_p->blockSize));
     
-    free(entry_p);
+    // free currentEntry which is called by getEntry
+    free(currentEntry);
+
     return 0;
 }
 
@@ -672,7 +672,7 @@ int fs_mkdir(const char *pathname, mode_t mode) {
 
     // update bitmap to signify used space
     for (int i = blockNo; i < blockNo + blocksNeeded; i++) {
-        freeMap[i] = 1;entryStruct *currentEntry;
+        freeMap[i] = 1;
     }
 
     // free malloc'd entry now that it is written in memory
@@ -712,8 +712,10 @@ int fs_rmdir(const char *pathname) {
     //int entryNo;
     int found = 0; // bool to check if path exists
 
+    char *path = (char *)pathname;
+
     // parse file path to global variable parsedPath
-    parsePath(pathname);
+    parsePath(path);
 
     // get length of array (used for getentry function)
     int pathLength = getArrLength(parsedPath);
@@ -773,6 +775,9 @@ int fs_rmdir(const char *pathname) {
             parentEntry[0].childrenAmount--;
         }
     }
+
+    // write parent entry back to memory
+    LBAwrite(parentEntry, parentCount, parentLocation);
 
     // print if deleted
     printf("DIRECTORY DELETED\n");
