@@ -36,6 +36,7 @@ typedef struct b_fcb
 
 	//Added
 	int linuxFd; //idk if needed
+	int currentBlk;
 } b_fcb;
 
 b_fcb fcbArray[MAXFCBS];
@@ -127,6 +128,7 @@ int b_seek(b_io_fd fd, off_t offset, int whence) {
 
 // Interface to write function
 int b_write(b_io_fd fd, char *buffer, int count) {
+	b_fcb *fcb = &fcbArray[fd];
 	int bytesCopied;
 	int nextBytesCopied = count - bytesCopied;
 	int freeSpace = bufSize - fcb->index;
@@ -147,12 +149,17 @@ int b_write(b_io_fd fd, char *buffer, int count) {
 
 	memcpy(fcb->buf + fcb->index, buffer, bytesCopied);
 	fcb->index = fcb->index + bytesCopied;
-
-	if (nextBytesCopied != 0) {
-		//find the next free block
+	//find the next free block
 		//if (block is not free)
 			//throw error if there is not enough space to write
 		//else (write the data to disk)
+	if (nextBytesCopied != 0) {
+		if(fcb->currentBlk < 0){
+			printf("not enough space to write");
+		}else{
+			//LBAwrite(fcb->buf, nextBytesCopied, fcb->currentBlk);
+		}
+		
 	fcb->index = 0;
 	memcpy(fcb->buf + fcb->index, buffer + bytesCopied, nextBytesCopied);
 	fcb->index = fcb->index + nextBytesCopied;
@@ -189,8 +196,8 @@ int b_write(b_io_fd fd, char *buffer, int count) {
  * 
  * @return bytesReturned
  *****************************************************************************/    
-int b_read(b_io_fd fd, char *buffer, int count) {
-
+int b_read(b_io_fd fd, char *buffer, int count) { //Bierman implementation, need to change
+	b_fcb *fcb = &fcbArray[fd];
 	int bytesRead, bytesReturned; // for what we read and what we will return
 	int part1, part2, part3;
 	int blocksToCopy, leftoverBytes; // holds blocks needed to copy and how many bytes are left in buffer
@@ -229,14 +236,14 @@ int b_read(b_io_fd fd, char *buffer, int count) {
 	}
 
 	if (part2 > 0){
-		// bytesRead = LBAread(buffer + part1, blocksToCopy, fcbArray[fd].currentBlk + fcbArray[fd].fi->location);
-		// fcbArray[fd].currentBlk += blocksToCopy;
+		bytesRead = LBAread(buffer + part1, blocksToCopy, fcbArray[fd].currentBlk);
+		fcbArray[fd].currentBlk += blocksToCopy;
 		part2 = bytesRead;
 	}
 
 	if (part3 > 0) {
-		// bytesRead = LBAread(fcbArray[fd].buf, 1, fcbArray[fd].currentBlk + fcbArray[fd].fi->location);
-		// fcbArray[fd].currentBlk += 1;
+		bytesRead = LBAread(fcbArray[fd].buf, 1, fcbArray[fd].currentBlk);
+		fcbArray[fd].currentBlk += 1;
 		fcbArray[fd].index = 0;
 		fcbArray[fd].buflen = bytesRead;
 
@@ -255,9 +262,6 @@ int b_read(b_io_fd fd, char *buffer, int count) {
 
 // Interface to Close the file
 void b_close(b_io_fd fd) {
-	/*
-	free(fcbArray[fd].buf);
-	fcbArray[fd].buf = NULL;
-	*/
+	//fcbArray[fd].buf = NULL;
 }
 
