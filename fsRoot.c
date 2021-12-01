@@ -8,8 +8,7 @@
 *
 * File: fsRoot.c
 *
-* Description: logic for the initRoot() function and also
-* creation of the listOfEntries array
+* Description: logic for the initRoot() function
 **************************************************************/
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,23 +22,20 @@
 
 entryStruct *entry_p;
 
-
-
-// some sort of way to keep track of our entries?
-//array of directory entries witht he size 5 * 512 which is 2,560 bytes
-
 /**********************************************************************
-* -----------------Initializing the root directory---------------------
-
-* First, there will need to be a malloc for the root directory which is
-* 3000 bytes. Next, Creating a pointer to an array of directory entries
-* and initializing them to be in a free state.
-* Next, the first directory entry will be "." which will be of size
-* 3060 bytes. It will begin at block number ...
-* Next, the second directory entry will be ".." which will be the same 
-* as the first entry "." except that the name will be ".."
-* Finally, return the starting block number of the root directory
-**********************************************************************/
+ *			   -----Initializing the root directory-----
+ *
+ * First, there will need to be a malloc for the root directory which is
+ * 3000 bytes. Next, Creating a pointer to an array of directory entries
+ * and initializing them to be in a free state.
+ * Next, the first directory entry will be "." which will be of size
+ * 3060 bytes. It will begin at block number ...
+ * Next, the second directory entry will be ".." which will be the same 
+ * as the first entry "." except that the name will be ".."
+ * Finally, return the starting block number of the root directory
+ *
+ * @return freeBlock
+ **********************************************************************/
 int initRootDir(uint64_t blockSize) {
 	printf("-----Initializing the root directory-----\n");
 		
@@ -55,8 +51,7 @@ int initRootDir(uint64_t blockSize) {
 	// find free space
 	int freeBlock = findFreeBlocks(blocksNeeded); // parameter is amount of blocks needed for root
 
-    for (int i = freeBlock; i < freeBlock + blocksNeeded; i++)
-    {
+    for (int i = freeBlock; i < freeBlock + blocksNeeded; i++) {
 		// mark free map used 
         freeMap[i] = 1;
     }
@@ -68,7 +63,7 @@ int initRootDir(uint64_t blockSize) {
 	// amount of blocks root takes up 
 	entry_p[0].blockCount = blocksNeeded; 
 	entry_p[0].size = entrySize;
-	entry_p[0].type=1; // directory
+	entry_p[0].type = 1; // directory
 	entry_p[0].childrenAmount = 0;
 
 	// second entry is the same as first because root does not have a parent 
@@ -77,17 +72,16 @@ int initRootDir(uint64_t blockSize) {
     entry_p[1].blockLocation = freeBlock;
 	entry_p[1].blockCount = blocksNeeded;
 	entry_p[1].size = entrySize;
-	entry_p[1].type=1;
+	entry_p[1].type = 1;
 
 	// other directories will be initialized when made.
 	// when you make a directory, you will update block location and other
 	// necessary information, and marked them as used.
 	
-	
-	for(int i=2; i<DIRENTRIES; i++){
+	for(int i = 2; i < DIRENTRIES; i++) {
 		// marked as undefined. We can use this to see what entries
 		// are being used inside our directory.
-		entry_p[i].type=0;
+		entry_p[i].type = 0;
 		strcpy(entry_p[i].name,"entry");
 	}
 

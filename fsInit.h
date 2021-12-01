@@ -1,3 +1,20 @@
+/**************************************************************
+* Class:  CSC-415-03 + CSC-415-02 Fall 2021
+* Names: Natalie Christie , Joseph Kois , Jade Simien , Eugene San Juan
+* Student IDs: 918376646 , 920921089 , 920258687 , 918354065
+* GitHub Name: nataliekchristie , josephkois , JadeS01 , esanjuan915
+* Group Name: Arrays of Dread
+* Project: Basic File System
+*
+* File: fsInit.h
+*
+* Description: Main driver for file system assignment.
+*
+* This file is the header file for fsInit which contains our
+* struct for the vcb, some global variables, and functions for 
+* initialization
+**************************************************************/
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -38,11 +55,7 @@ vcbStruct *vcb_p; // global variable for VCB
 char *freeMap; // global variable for free space map to keep in memory
 
 int findFreeBlocks(int blocksNeeded);
-
 int initRootDir(uint64_t blockSize);
-
 int initFreeSpace(uint64_t numberOfBlocks, uint64_t blockSize);
-
 int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize);
-
 void exitFileSystem();

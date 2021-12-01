@@ -12,7 +12,6 @@
 *
 * This file is where you will start and initialize your system
 * initialize the volume control block
-*
 **************************************************************/
 
 #include <stdlib.h>
@@ -24,7 +23,8 @@
 #include "fsInit.h"
 
 /**************************************************************************
-* --------------------Initializing the file system-------------------------
+* 				-----Initializing the file system-----
+*
 * First, store a mallaoc of blocksize into the vcb pointer variable,
 * then calling an LBAread, with block 0. 
 * Next, check if the magic number number in the structure matches with the 
@@ -36,7 +36,7 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize) {
 	printf("Initializing File System with %lu blocks with a block size of %lu\n", numberOfBlocks, blockSize);
 	printf("About to allocate %ld bytes for VCB\n", sizeof(vcbStruct));
 
-	vcb_p = malloc(5*blockSize);
+	vcb_p = malloc(5 * blockSize);
 	
 	LBAread(vcb_p, 1, 0);
 

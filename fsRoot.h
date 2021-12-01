@@ -8,8 +8,7 @@
 *
 * File: fsRoot.h
 *
-* Description: holds the directory functions like initialize
-* root directory, will use in conjunction with mfs.h later on.
+* Description: holds the initRootDir() function
 **************************************************************/
 
 int initRootDir();

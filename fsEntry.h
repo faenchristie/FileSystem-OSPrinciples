@@ -9,7 +9,7 @@
 * File: fsEntry.h
 *
 * Description: Represents entries whether they be files
-or directories.
+* or directories. Holds a struct of entries
 **************************************************************/
 
 #include <stdlib.h>
@@ -22,12 +22,10 @@ typedef struct
     int blockLocation;
     char name[50];
     int type; // 0 = undefined, 1 = directory, 2 = file
-    //char type[50]; // D = directory, F = file
     int size;
     // added :
     int blockCount; // counts number of logical blocks used
     int parent;     // need some way of tracking parent location
     int parentCount; // block count of parent
-    // maybe?
     int childrenAmount;
 } entryStruct, *entryStruct_p;

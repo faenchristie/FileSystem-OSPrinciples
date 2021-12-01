@@ -10,7 +10,6 @@
 *	This is the file system interface.
 *	This is the interface needed by the driver to interact with
 *	your filesystem.
-*
 **************************************************************/
 #ifndef _MFS_H
 #define _MFS_H
@@ -41,17 +40,19 @@ typedef u_int32_t uint32_t;
 #define DEFAULTSIZE 2442
 #define BLOCKS DEFAULTSIZE / BLOCKSIZE
 
-// ************ TEAM ADDED FUNCTIONS ******************
-
-
+/******************************************************************************
+ * GLOBAL VARIABLES HERE
+ *****************************************************************************/
 char *parsedPath[500];
 char *parentPath[500];
 char currentDirectoryPath[200]; //from old fsDirectoryEntryOps.c
 int currentDirectoryPathArraySize;
-// keeps track of index of entry
-int readDirIndex;
-// keeps track of amount of children read
-int readDirRead;
+int readDirIndex; // keeps track of index of entry
+int readDirRead; // keeps track of amount of children read
+
+/******************************************************************************
+ * TEAM ADDED HELPER FUNCTIONS
+ *****************************************************************************/
 void parsePath(char *path);
 int getArrLength(char *arr[]);
 void getParentPath();
