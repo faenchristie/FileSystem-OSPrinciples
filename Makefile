@@ -65,6 +65,3 @@ clean:
 
 run: $(ROOTNAME)$(HW)$(FOPTION)
 	./$(ROOTNAME)$(HW)$(FOPTION) $(RUNOPTIONS)
-
-test:
-	valgrind --leak-check=yes ./$(ROOTNAME)$(HW)$(FOPTION) $(RUNOPTIONS)
