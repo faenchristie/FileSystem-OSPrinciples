@@ -9,7 +9,7 @@
 * File: b_io.c
 *
 * Description: Basic File System - Key File I/O Operations
-*
+* 
 **************************************************************/
 
 #include <stdio.h>
@@ -135,13 +135,13 @@ b_io_fd b_open(char *filename, int flags) {
  * next, if else if statements for SEEK_SET, SEEK_CUR, and SEEK_END.
  * We need to reposition the file pointer and we do that with the above
  * the first, SEEK_SET will be placed to the location of the data + the offset
- * the next, SEEK_CUR will be placed at the pointer += offset
+ * the next, SEEK_CUR will be placed at the location += offset
  * the last SEEK_END will be placed at the end of the file, so we use fileSize
  * here + the offset.
  * Also created an else statement at the end that will just return -1 error 
  * if the value of the origin is invalid.
  * 
- * @return 0, for now, it should return the offset location measured in bytes
+ * @return fcbArray[fd].loc
  *****************************************************************************/
 int b_seek(b_io_fd fd, off_t offset, int whence) {
 	if (startup == 0)
@@ -173,7 +173,6 @@ int b_seek(b_io_fd fd, off_t offset, int whence) {
 		printf("invalid value of whence for this function.\n");
 		return -1;
 	}
-
 }
 
 /******************************************************************************
@@ -192,10 +191,12 @@ int b_seek(b_io_fd fd, off_t offset, int whence) {
  * if there isnt enough space. then do another memcpy of the next amount of 
  * bytes copied which was our other variable for the leftover bytes.
  * 
+ * ISSUE: needs comment portion completed
+ * 
  * @return totalBytesCopied
  *****************************************************************************/
 int b_write(b_io_fd fd, char *buffer, int count) {
-	//*******TO DO ******//
+	
 	int bytesCopied;
 	b_fcb * fcb;
 	int nextBytesCopied = count - bytesCopied;
@@ -215,6 +216,7 @@ int b_write(b_io_fd fd, char *buffer, int count) {
 		bytesCopied = freeSpace;
 	}
 
+	//copy buffer to the buffer + index
 	memcpy(fcb->f_buffer + fcb->index, buffer, bytesCopied);
 	fcb->index = fcb->index + bytesCopied;
 
@@ -224,6 +226,7 @@ int b_write(b_io_fd fd, char *buffer, int count) {
 			//throw error if there is not enough space to write
 		//else (write the data to disk)
 	fcb->index = 0;
+	//copy buffer + bytecopied to buffer + index
 	memcpy(fcb->f_buffer + fcb->index, buffer + bytesCopied, nextBytesCopied);
 	fcb->index = fcb->index + nextBytesCopied;
 	}
