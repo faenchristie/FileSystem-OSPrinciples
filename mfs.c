@@ -411,7 +411,7 @@ int fs_stat(const char *path, struct fs_stat *buf) {
     // print out entry's information
     printf("Total Size: %ld\n", (buf->st_size = currentEntry[0].size));
     printf("Number of blocks: %ld\n", (buf->st_blocks = currentEntry[0].blockCount));
-    printf("Blocksize: %d\n", (buf->st_blksize = vcb_p->blockSize));
+    printf("Blocksize: %ld\n", (buf->st_blksize = vcb_p->blockSize));
     
     free(entry_p);
     return 0;
@@ -591,7 +591,7 @@ int fs_mkdir(const char *pathname, mode_t mode) {
     free(entry_p);
     entry_p = NULL;
 
-    printf("Directory '%s' successfully made\n",pathname);
+    printf("Directory '%s' successfully made\n",path);
 
     return 0;
 }
