@@ -42,7 +42,6 @@ typedef struct b_fcb
 	int loc;
 	int read;
 	int sizeOfFile;
-
 } b_fcb;
 
 b_fcb fcbArray[MAXFCBS];
@@ -124,7 +123,7 @@ b_io_fd b_open(char *filename, int flags) {
 
 	//printf("b_open: opening file '%s' with file descriptor %d\n", filename, fd);
 
-	return (returnFd); // all set
+	return (returnFd); 
 }
 
 /******************************************************************************
@@ -154,23 +153,27 @@ int b_seek(b_io_fd fd, off_t offset, int whence) {
 	}
 
 	if(whence = SEEK_SET) {
-		fcbArray[fd].fi = fcbArray[fd].loc + offset;
-		return fcbArray[fd].fi;
+		fcbArray[fd].loc = offset;
+		return fcbArray[fd].loc;
+	}
 
-	}else if(whence = SEEK_CUR) {
-		fcbArray[fd].fi = fcbArray[fd].fi + offset;
-		return fcbArray[fd].fi;
+	else if(whence = SEEK_CUR) {
+		fcbArray[fd].loc = fcbArray[fd].loc + offset;
+		return fcbArray[fd].loc;
 
-	}else if(whence = SEEK_END){
-		fcbArray[fd].fi = fcbArray[fd].fileSize + offset;
-		return fcbArray[fd].fi;
+	}
 
-	} else{
+	else if(whence = SEEK_END){
+		fcbArray[fd].loc = fcbArray[fd].sizeOfFile + offset;
+		return fcbArray[fd].loc;
+
+	} 
+	// print error if not valid function parameter
+	else{
 		printf("invalid value of whence for this function.\n");
 		return -1;
 	}
 
-	return (0); //change this
 }
 
 /******************************************************************************
@@ -192,6 +195,7 @@ int b_seek(b_io_fd fd, off_t offset, int whence) {
  * @return totalBytesCopied
  *****************************************************************************/
 int b_write(b_io_fd fd, char *buffer, int count) {
+	//*******TO DO ******//
 	int bytesCopied;
 	b_fcb * fcb;
 	int nextBytesCopied = count - bytesCopied;
@@ -385,9 +389,12 @@ int b_read(b_io_fd fd, char *buffer, int count) {
 
 // Interface to Close the file
 void b_close(b_io_fd fd) {
+
+	// free what was malloc'd
 	/*
-	free(fcbArray[fd].buf);
-	fcbArray[fd].buf = NULL;
+	free(fcbArray[fd]);
+	fcbArray[fd] == NULL;
 	*/
+	
 }
 

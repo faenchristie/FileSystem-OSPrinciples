@@ -54,14 +54,12 @@ int initRootDir(uint64_t blockSize) {
 
 	// find free space
 	int freeBlock = findFreeBlocks(blocksNeeded); // parameter is amount of blocks needed for root
-	printf("Root start block: %i\n",freeBlock);
-	printf("Root blocksNeeded: %i\n",blocksNeeded);
+
     for (int i = freeBlock; i < freeBlock + blocksNeeded; i++)
     {
 		// mark free map used 
         freeMap[i] = 1;
     }
-	printf("Next free block after root: %i\n",findFreeBlocks(blocksNeeded));
 
     // "." directory, or first entry, is just a pointer to the current directory.
 	strcpy(entry_p[0].name,".");
@@ -72,8 +70,6 @@ int initRootDir(uint64_t blockSize) {
 	entry_p[0].size = entrySize;
 	entry_p[0].type=1; // directory
 	entry_p[0].childrenAmount = 0;
-	// path of root directory
-	//entry_p[0].path="/";
 
 	// second entry is the same as first because root does not have a parent 
 	// except the name is ".."
@@ -82,7 +78,6 @@ int initRootDir(uint64_t blockSize) {
 	entry_p[1].blockCount = blocksNeeded;
 	entry_p[1].size = entrySize;
 	entry_p[1].type=1;
-	//entry_p[1].path="/";
 
 	// other directories will be initialized when made.
 	// when you make a directory, you will update block location and other

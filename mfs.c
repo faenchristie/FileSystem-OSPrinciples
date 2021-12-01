@@ -9,7 +9,7 @@
 * File: mfs.c
 *
 * Description: File contains functions for directory operations 
-* including read, close, open, isfile, isDir, stat
+* including read, close, open, isfile, isDir, stat. 
 **************************************************************/
 
 #include <stdlib.h>
@@ -25,9 +25,12 @@
 /******************************************************************************
  * GLOBAL VARIABLES HERE
  *****************************************************************************/
+ // keeps track of entries we are looking for
 entryStruct *currentEntry = NULL;
 entryStruct *parentEntry = NULL;
+// directoryEntry info
 struct fs_diriteminfo * directoryEntry = NULL;
+// general entrySize for malloc'ing
 int entrySize = sizeof(entryStruct) * DIRENTRIES;
 
 /******************************************************************************
@@ -37,7 +40,6 @@ int entrySize = sizeof(entryStruct) * DIRENTRIES;
  * ends.
  *****************************************************************************/
  void parsePath(char *path) {
-    //printf("PARSED PATH FUNC\n");
      // get length of parsedPath, traverse through, nullify
     int arrLength = getArrLength(parsedPath);
     for(int i = 0; i < arrLength; i++){
@@ -48,6 +50,7 @@ int entrySize = sizeof(entryStruct) * DIRENTRIES;
     char *token = strtok_r(path, delim, &savePtr);
 
     int i = 0;
+    // save into new parsedPath global variable
     while(token != NULL){
         parsedPath[i] = token;
         i++;
@@ -64,12 +67,10 @@ int entrySize = sizeof(entryStruct) * DIRENTRIES;
  * while loop under the condition that the array count is not null, update the
  * count.
  * 
- * //removed (arr[count] != ('\0')||) 
- * 
- * @return count
+ * return count
  *****************************************************************************/
 int getArrLength(char *arr[]) {
-    //printf("ARRLENGTH FUNC\n");
+
     int count = 0;
 
     while (arr[count] != NULL) { 
@@ -87,7 +88,6 @@ int getArrLength(char *arr[]) {
  * 
  *****************************************************************************/
 void getParentPath(){
-    //printf("get Parent Path Function\n");
     // nullify past parent path
     int arrLength = getArrLength(parentPath);
     for(int i = 0; i < arrLength; i++){
@@ -99,8 +99,7 @@ void getParentPath(){
     for(int i = 0; i < pathLength-1; i++){
         parentPath[i] = parsedPath[i];
     }
-    int parentPathLength = getArrLength(parentPath);
-
+    //int parentPathLength = getArrLength(parentPath);
 }
 
 /******************************************************************************
@@ -110,70 +109,36 @@ void getParentPath(){
  * Returns a pointer to an array of entries.
  *****************************************************************************/
 void getEntryFromPath(char *arr[], int arrLength){
-    //printf("arrLength is %i :\n",arrLength);
-    printf("GETENTRYFROMPATH REACHED\n");
-    // malloc space needed: size of struct * average entries for directory
-    //int entrySize = sizeof(entryStruct) * DIRENTRIES;
+
+    // check if currentEntry needs to be malloc'd
     if(currentEntry == NULL){
-    printf("MALLOC CURRENTENTRY\n");
     currentEntry = malloc(entrySize);
     }
-
-    printf("GETENTRY ERROR 1\n");
-    //entryStruct *tempEntry;
-    printf("GETENTRY ERROR 1.1\n");
-    //tempEntry = malloc(entrySize);
-    
-    printf("GETENTRY ERROR 2\n");
-    // read in root directory into entry_p. 
+    // read in root directory into entry_p using info from vcbb 
     LBAread(currentEntry, vcb_p->rootDirBlocks, vcb_p->rootDir);
-    printf("GETENTRY ERROR 3\n");
-
+  
     // return root 
     if(strlen((char*)arr)==0||strcmp(arr[0],"")==0){
-        printf("Strlen == 0\n");
         return;
     }
 
     // "boolean" that checks if parent entry was found
     int found = 0;
 
-    printf("GETENTRY ERROR 4\n");
     // first for loop loops through each segment of the path
     for(int i = 0; i < arrLength; i++){
-        printf("GETENTRY ERROR 5\n");
         // inner for loop loops through each entry of the directory
         for(int j = 2; j < DIRENTRIES; j++){
-            printf("GETENTRY ERROR 6\n");
-            // ******************** //
-            // NOTE: Should I check if value is null to avoid segfault?
-            // ******************** //
-            printf("tempEntry name: %s\n", currentEntry[j].name);
-            //printf("arr[0]: %s\n", arr[0]);
             // compares the path name to the  name of each directory entry
             if(strcmp(currentEntry[j].name,arr[i])==0){
-                printf("GETENTRY ERROR 7\n");
-                //printf("currentEntry block count: %i\n",currentEntry[j].blockCount);
-                //printf("currentEntry block location: %i\n",currentEntry[j].blockLocation);
                 // read next directory into tempEntry if matches
                 int blockCount = currentEntry[j].blockCount;
                 int blockLocation = currentEntry[j].blockLocation;
                 LBAread(currentEntry, currentEntry[j].blockCount, currentEntry[j].blockLocation);
-                printf("GETENTRY ERROR 8\n");
-                // move onto next entry
-                //currentEntry = tempEntry;
-                //printf("currentEntry block count: %i\n",currentEntry[j].blockCount);
-                //printf("currentEntry block location: %i\n",currentEntry[j].blockLocation);
-                //printf("currentEntry type: %i\n",currentEntry[j].type);
-                printf("GETENTRY ERROR 9\n");
+                // directory found; move onto next
                 found = 1;
                 break;
             } else{
-                // make entry_p null if not found. This will be used to check
-                // if the directory was found. 
-                printf("GETENTRY ERROR 10\n");
-                //currentEntry = NULL;
-                printf("GETENTRY ERROR 11\n");
                 // not found
                 found = 0;
             }
@@ -187,14 +152,7 @@ void getEntryFromPath(char *arr[], int arrLength){
             printf("DIRECTORY NOT FOUND\n");
             return;
         }
-        /*
-        if(found = 1){
-            break;
-        }*/
     }
-    //printf("Current entry block location: %i\n", currentEntry[0].blockLocation);
-    printf("GETENTRY ERROR 12\n");
-
     return;
 }
 
@@ -218,18 +176,16 @@ void getEntryFromPath(char *arr[], int arrLength){
 fdDir *fs_opendir(const char *name) {
     int fd;
     struct dirent *openDir;
-    // added bc const char error?
     char *filename = (char*)name;
-    /* 
-    * warning: passing argument 1 of ‘b_open’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
-    * mfs.c:33:7: note: expected ‘char *’ but argument is of type ‘const char *’
-    */
+
+    // open entry to get fd 
     fd = b_open(filename, O_RDWR);
 
     if(fd < 0){
         printf("Could not open %s directory.\n", name);
         return NULL;
     }
+    // fdDir struct to keep track of entry information
     fdDir *dir; 
     dir = malloc(sizeof(fdDir));
     parsePath(filename); // parse path to global variable parsePath
@@ -241,23 +197,14 @@ fdDir *fs_opendir(const char *name) {
         printf("No such directory %s found.\n",name);
         return NULL;
     }
-    //dir->dirEntryPosition = 2; 
     // starting block of where directory is located
     dir->directoryStartLocation = currentEntry[0].blockLocation;
     dir->directoryBlockAmount = currentEntry[0].blockCount;
-    // add logic for counting children if possible
     dir->childrenAmount = currentEntry[0].childrenAmount;
     dir->readDirIndex = 0;
     dir->readDirRead = 0;
-    // figure out how to assign this
     //dir->d_reclen = 
-    /*
-    printf("OPENDIR BEFORE FREE\n");
-    if(!(currentEntry==NULL)){
-        printf("FREE CURRNETENTRY\n");
-    free(currentEntry);
-    printf("FREED\n");
-    }*/
+ 
     free(currentEntry);
     currentEntry = NULL;
     
@@ -277,8 +224,6 @@ fdDir *fs_opendir(const char *name) {
  * @return address of directoryEntry
  *****************************************************************************/
 struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
-    //printf("READDIR FUNCTION\n");
-
     // malloc only if needed
     if(directoryEntry == NULL){
     directoryEntry = malloc(sizeof(struct fs_diriteminfo));
@@ -289,14 +234,12 @@ struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
         // index of children starts at 2 , 0 and 1 are . and ..
         dirp->readDirIndex = 0;
         dirp->readDirRead = 0;
-        //printf("No more entries.\n");
         // finally free directoryEntry
         free(directoryEntry);
         return NULL;
     }
     // use to find entry
     entryStruct *entry;
-    //int entrySize = sizeof(entryStruct) * DIRENTRIES;
     entry = malloc(entrySize);
     // start at previous index + 1 to start
     int start = dirp->readDirIndex + 1;
@@ -350,13 +293,7 @@ struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
  * @return 0
  *****************************************************************************/
 int fs_closedir(fdDir *dirp) {
-    //Verify if dirp is an open directory
-    // not right
-    /*
-    if(dirp = fs_opendir(dirp->name) == NULL){
-        printf("%s is not an opened directory.\n", dirp->name);
-        return -1;
-    }*/
+  
     if(dirp==NULL){
         printf("Directory not open.");
         return -1;
@@ -382,7 +319,6 @@ int fs_closedir(fdDir *dirp) {
  * if it is not a file.
  *****************************************************************************/
 int fs_isFile(char *path) {
-    printf("IS FILE FUNCTION\n");
     
     parsePath(path); // returns to global variable parsedPath
 
@@ -392,6 +328,7 @@ int fs_isFile(char *path) {
     // returns to global vatiable currentEntry
     getEntryFromPath(parsedPath,pathLength);
 
+    // type 2 means file in our system, return true
     if(currentEntry[0].type == 2){
         return 1;
     }else{
@@ -410,17 +347,15 @@ int fs_isFile(char *path) {
  * if it is not a directory. if the type is 1 @return 1, else @return 0.
  *****************************************************************************/
 int fs_isDir(char *path) {
-    printf("IS DIR FUNCTION\n");
     // returns to global variable parsedPath
     parsePath(path);
-    printf("parsedPath %s\n",parsedPath[0]);
 
     // get length of parsed path (used for next function)
     int pathLength = getArrLength(parsedPath);
 
     // returns to global vatiable currentEntry
     getEntryFromPath(parsedPath,pathLength);
-    //printf("currentEntry.type %i\n",currentEntry[0].type);
+
     // if it is a directory, return successful
     if(currentEntry[0].type == 1){
         // make sure to check if currentEntry needs to be freed
@@ -451,12 +386,7 @@ int fs_isDir(char *path) {
  * next, we get the length of the parsed path and set the entry pointer to hold
  * the information from the getEntryFromPath function call
  * Next, we print out all the information of our filesystem to the terminal
- * 
- *  ****** COMMENTED OUT BC NOT VALID TYPE *****
- *  printf("Created: %d\n", (buf->st_createtime = entry_p->st_createtime));
- *  printf("Access time: %d\n", (buf->st_accesstime = entry_p->st_accesstime));
- *  printf("Last modification: %d\n", (buf->st_modtime = entry_p->st_modtime));
- * 
+ *
  * return 0 if successful.
  * 
  * @return 0
@@ -505,7 +435,7 @@ int fs_stat(const char *path, struct fs_stat *buf) {
  * @return 0
  *****************************************************************************/
 int fs_delete(char *filename) {
-
+    // used to find location
     int blocksUsed = 0;
     int blockStart = 0;
     // used to return error if file doesn't exist
@@ -567,8 +497,7 @@ int fs_delete(char *filename) {
 int fs_mkdir(const char *pathname, mode_t mode) {
     // to fix const char error
     char * path = (char *)pathname;
-    // malloc space needed: size of struct * average entries for directory
-    //int entrySize = sizeof(entryStruct) * DIRENTRIES;
+
     entryStruct * entry_p;
     // malloc space for entry_p
     entry_p = malloc(entrySize);
@@ -578,22 +507,13 @@ int fs_mkdir(const char *pathname, mode_t mode) {
     int pathLength;
     pathLength = getArrLength(parsedPath);
 
-    //printf("Path 0 = %s\n",parsedPath[0]);
-
-    //printf("PathLength %i",getArrLength(parsedPath));
-
+    // blocks needed for this entry based on size
     int blocksNeeded = ((entrySize + BLOCKSIZE - 1) / BLOCKSIZE);
     int blockNo = 0;
 
-    //printf("blocksNeeded %d\n",blocksNeeded);
-    //printf("blockNo %d\n",blockNo);
-
     // find free block space that will cover the amount needed in bitmap
-
     blockNo = findFreeBlocks(blocksNeeded);
 
-    //printf("blockNo %d\n",blockNo);
-    
     if (blockNo==0) {
         printf("ERROR: NOT ENOUGH MEMORY\n");
         return -1;
@@ -609,10 +529,6 @@ int fs_mkdir(const char *pathname, mode_t mode) {
         printf("DIRECTORY NOT FOUND\n");
         return -1;
     }
-    //printf("parent location: %i\n",currentEntry[0].blockLocation);
-    //printf("parent count: %i\n",currentEntry[0].blockCount);
-    //printf("parent name: %s\n",currentEntry[0].name);
-
     // assign values to parent entry
     // increment children amount of parent
     currentEntry[0].childrenAmount++;
@@ -637,12 +553,9 @@ int fs_mkdir(const char *pathname, mode_t mode) {
     for(int i = 2; i < DIRENTRIES-2; i++) {
         entry_p[i].type = 0;
     }
-    //printf("PARSED PATH: %s\n",parsedPath[pathLength-1]);
     for(int i=2; i<DIRENTRIES-1; i++){
-        //printf("currentEntry[%i].type:%i\n",i,currentEntry[i].type);
+        // empty entry, can be used
         if(currentEntry[i].type==0){
-            //printf("current entry reached\n");
-            // set current Entry [i] as our new entry
             currentEntry[i].blockLocation = blockNo;
             currentEntry[i].blockCount = blocksNeeded;
             currentEntry[i].type = 1;
@@ -651,21 +564,13 @@ int fs_mkdir(const char *pathname, mode_t mode) {
             currentEntry[0].childrenAmount++;
 
             // set name to the last item in the parsed pathh arr
-            //printf("parsedPath[]: %s\n",parsedPath[pathLength-1]);
             strcpy(currentEntry[i].name,parsedPath[pathLength-1]);
-            //currentEntry[i].name[0] = parsedPath[pathLength-1];
-            //printf("Current entry name: %s\n",currentEntry[i].name);
-            // write current entry to memory with new values
-            //printf("currenteEntry[0] block count: %i\n",currentEntry[0].blockCount);
-            //printf("currenteEntry[0] block loc: %i\n",currentEntry[0].blockLocation);
+            // write entry to memory
             LBAwrite(currentEntry,currentEntry[0].blockCount,currentEntry[0].blockLocation);
             // break from loop
             break;
         }
     }
-
-    // the last value of the path is the name of the entry
-    //strcpy(entry_p->name,parsedPath[pathLength]);
 
     // write new entry to memory
     LBAwrite(entry_p, blocksNeeded, blockNo);
@@ -723,11 +628,10 @@ int fs_rmdir(const char *pathname) {
 
     // get entry save in global variable currentEntry
     getEntryFromPath(parsedPath, pathLength);
-    printf("RM DIR 1\n");
+
     if(currentEntry != NULL){
         found = 1;
     }
-    printf("RM DIR 2\n");
     // if not found
     if (!found) {
         printf("DIRECTORY DOES NOT EXIST\n");
@@ -736,8 +640,7 @@ int fs_rmdir(const char *pathname) {
         currentEntry = NULL;
         return -1;
     }
-    printf("RM DIR 3\n");
-    // check if directory has children or not
+    // check if directory has children or not, return error if does
     if(currentEntry[0].childrenAmount != 0){
         // free currentEntry
         free(currentEntry);
@@ -745,22 +648,17 @@ int fs_rmdir(const char *pathname) {
         printf("CANNOT DELETE DIRECTORY WITH ENTRIES");
         return -1;
     }
-    printf("RM DIR 4\n");
     // variables needed to find parent entry
-    //entryStruct *parentEntry;
-    printf("RM DIR 5\n");
-    //int entrySize = sizeof(entryStruct) * DIRENTRIES;
     if(parentEntry==NULL){
     printf("parentEntry==NULL\n");
     parentEntry = malloc(entrySize);
     }
-    printf("RM DIR 6\n");
+    // location needed to read into memory
     int parentLocation = currentEntry[0].parent;
     int parentCount = currentEntry[0].parentCount;
-    printf("RM DIR 7\n");
     // read parent into memory using variables stored in dir
     LBAread(parentEntry,parentCount,parentLocation);
-    printf("RM DIR 8\n");
+  
     // find child in parent entry to remove from its list
     for(int i = 0; i < DIRENTRIES; i++) {
         // if name matches, entry found
@@ -777,7 +675,6 @@ int fs_rmdir(const char *pathname) {
         }
     }
 
-    // print if deleted
     printf("DIRECTORY DELETED\n");
 
     // mark bitmap space to 0 to signify space is free
@@ -831,10 +728,7 @@ char *fs_getcwd(char *buf, size_t size) {
  * @return 0
  *****************************************************************************/
 int fs_setcwd(char *buf) {
-    // parse requested file path
-    //char *parsedPath = parsePath(buf);
     parsePath(buf);
-    printf("after path parse\n");
 
     // Check validity of path
     if(fs_isDir(buf) != 1){
@@ -842,28 +736,11 @@ int fs_setcwd(char *buf) {
         return -1;
     }
 
-    // search for directory based on path
-    //entryStruct *entry_p;
     int pathLength = getArrLength(parsedPath);
-    printf("before get entry\n");
-    //getEntryFromPath(parsedPath, pathLength);
-    printf("after get entry\n");
-
     // clear old path
     currentDirectoryPath[0] = '\0';
-    // ******* INVALID ********
-    //currentDirectoryPathArraySize = 0;
 
-/*
-    // set new CWD by copying parsed path to CurrDirPathArr
-    for(int i = 0; i < getArrLength(parsedPath); i++) {
-        strcpy(currentDirectoryPath[i], parsedPath[i]);
-        // fix this
-        //sprintf(currentDirectoryPath, "%s,%s", currentDirectoryPath, buf[i]);
-        // ********* INVALID *********
-        //currentDirectoryPathArraySize++;
-    }*/
-
+    // copy in new path
     strcpy(currentDirectoryPath,buf);
 
     printf("Setting cwd to %s\n", currentDirectoryPath);
