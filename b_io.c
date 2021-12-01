@@ -152,18 +152,18 @@ int b_seek(b_io_fd fd, off_t offset, int whence) {
 		return (-1); //invalid file descriptor
 	}
 
-	if(whence = SEEK_SET) {
+	if(whence == SEEK_SET) {
 		fcbArray[fd].loc = offset;
 		return fcbArray[fd].loc;
 	}
 
-	else if(whence = SEEK_CUR) {
+	else if(whence == SEEK_CUR) {
 		fcbArray[fd].loc = fcbArray[fd].loc + offset;
 		return fcbArray[fd].loc;
 
 	}
 
-	else if(whence = SEEK_END){
+	else if(whence == SEEK_END){
 		fcbArray[fd].loc = fcbArray[fd].sizeOfFile + offset;
 		return fcbArray[fd].loc;
 

@@ -411,7 +411,7 @@ int fs_stat(const char *path, struct fs_stat *buf) {
     // print out entry's information
     printf("Total Size: %ld\n", (buf->st_size = currentEntry[0].size));
     printf("Number of blocks: %ld\n", (buf->st_blocks = currentEntry[0].blockCount));
-    printf("Blocksize: %ld\n", (buf->st_blksize = vcb_p->blockSize));
+    printf("Blocksize: %d\n", (buf->st_blksize = vcb_p->blockSize));
     
     free(entry_p);
     return 0;
@@ -735,7 +735,7 @@ int fs_setcwd(char *buf) {
     parsePath(buf);
 
     // Check validity of path
-    if(fs_isDir(buf) != 1){
+    if(fs_isDir(buf) != 1) {
         printf("%s is not a valid directory.\n", buf);
         return -1;
     }
