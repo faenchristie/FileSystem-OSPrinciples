@@ -31,23 +31,17 @@ typedef struct b_fcb
 {
 	entryStruct *fi; //holds the low level systems file info
 	// Add any other needed variables here to track the individual open file
-
 	// file id / location in array
 	int id;
-
-	// our buffer for reading file
-	char *f_buffer;
-
+	char *f_buffer; // our buffer for reading file
 	int buflen;
 	int index;
-
-	// offset of file / offset of buffer(when partial)
-	int f_offset;
-	int b_offset;
-
+	int f_offset; // offset of file 
+	int b_offset; // offset of buffer(when partial)
 	// block location, track amount already read to user
 	int loc;
 	int read;
+	int sizeOfFile;
 
 } b_fcb;
 
@@ -84,10 +78,18 @@ b_io_fd b_getFCB()
 }
 
 /******************************************************************************
- * Interface to open a buffered file
+ * 				-----Interface to open a buffered file-----
+ * 
  * Modification of interface for this assignment, flags match the linux flags
  * for open
  * O_RDONLY, O_WRONLY, or O_RDWR
+ * First, initialize if need be
+ * then an error check for the return fcb to make sure we actually got it
+ * malloc to the size of our vcb
+ * another error check if there isnt enough space
+ * set the buffer length and index to 0
+ * 
+ * @return returnFD
  *****************************************************************************/
 b_io_fd b_open(char *filename, int flags) {
 
@@ -125,7 +127,23 @@ b_io_fd b_open(char *filename, int flags) {
 	return (returnFd); // all set
 }
 
-// Interface to seek function
+/******************************************************************************
+ * 					-----Interface to seek function-----
+ * 
+ * repositions the file offset of the open file description 
+ * 
+ * Initialize system if need be and do an error check
+ * next, if else if statements for SEEK_SET, SEEK_CUR, and SEEK_END.
+ * We need to reposition the file pointer and we do that with the above
+ * the first, SEEK_SET will be placed to the location of the data + the offset
+ * the next, SEEK_CUR will be placed at the pointer += offset
+ * the last SEEK_END will be placed at the end of the file, so we use fileSize
+ * here + the offset.
+ * Also created an else statement at the end that will just return -1 error 
+ * if the value of the origin is invalid.
+ * 
+ * @return 0, for now, it should return the offset location measured in bytes
+ *****************************************************************************/
 int b_seek(b_io_fd fd, off_t offset, int whence) {
 	if (startup == 0)
 		b_init(); //Initialize our system
@@ -135,16 +153,49 @@ int b_seek(b_io_fd fd, off_t offset, int whence) {
 		return (-1); //invalid file descriptor
 	}
 
-	return (0); //Change this
+	if(whence = SEEK_SET) {
+		fcbArray[fd].fi = fcbArray[fd].loc + offset;
+		return fcbArray[fd].fi;
+
+	}else if(whence = SEEK_CUR) {
+		fcbArray[fd].fi = fcbArray[fd].fi + offset;
+		return fcbArray[fd].fi;
+
+	}else if(whence = SEEK_END){
+		fcbArray[fd].fi = fcbArray[fd].fileSize + offset;
+		return fcbArray[fd].fi;
+
+	} else{
+		printf("invalid value of whence for this function.\n");
+		return -1;
+	}
+
+	return (0); //change this
 }
 
-// Interface to write function
+/******************************************************************************
+ * 					-----Interface to write function-----
+ * 
+ * creating a few variables to get the bytes we need copied
+ * initialize system if need be, and error check for the file descriptor
+ * 
+ * first, created an if else statement to determine what the byteCopied will
+ * consist of originally, either the count, or the freeSpace, based on the 
+ * values of either of them.
+ * call a memcpy of the buffer to the buffer + index with the amount of bytes
+ * that were copied.
+ * the next block of code is incomplete but the goal is to find the next free
+ * block available and then write the data to disk, throwing an error message
+ * if there isnt enough space. then do another memcpy of the next amount of 
+ * bytes copied which was our other variable for the leftover bytes.
+ * 
+ * @return totalBytesCopied
+ *****************************************************************************/
 int b_write(b_io_fd fd, char *buffer, int count) {
 	int bytesCopied;
 	b_fcb * fcb;
 	int nextBytesCopied = count - bytesCopied;
 	int freeSpace = bufSize - fcb->index;
-
 
 	if (startup == 0)
 		b_init(); //Initialize our system
@@ -178,7 +229,7 @@ int b_write(b_io_fd fd, char *buffer, int count) {
 }
 
 /******************************************************************************
- * Interface to read a buffer
+ * 					-----Interface to read a buffer-----
  * 
  * Filling the callers request is broken into three parts
  * Part 1 is what can be filled from the current buffer, which may or may not 
@@ -192,6 +243,8 @@ int b_write(b_io_fd fd, char *buffer, int count) {
  * callers buffer after fulfilling part 1 and part 2.  This would always be 
  * filled from a refill of our buffer.
  * 
+ * Used mostly team member Natalie Christie's logic from Assignment 2b 
+ * 
  * +-------------+------------------------------------------------+--------+
  * |             |                                                |        |
  * | filled from |  filled direct in multiples of the block size  | filled |
@@ -201,10 +254,7 @@ int b_write(b_io_fd fd, char *buffer, int count) {
  * |             |                                                |        |
  * | Part1       |  Part 2                                        | Part3  |
  * +-------------+------------------------------------------------+--------+
- * 
- * 
  *****************************************************************************/    
- // Used mostly team member Natalie Christie's logic from Assignment 2b 
 int b_read(b_io_fd fd, char *buffer, int count) {
 
 	if (startup == 0)
